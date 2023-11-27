@@ -1,0 +1,25 @@
+{
+  "name": "oxo.js",
+  "module": "index.ts",
+  "type": "module",
+  "scripts": {
+    "start": "bun run index.ts"
+  },
+  "devDependencies": {
+    "@types/koa": "^2.13.12",
+    "@types/koa-router": "^7.4.8",
+    "@types/pdfjs-dist": "^2.10.378",
+    "bun-types": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "@types/koa-static": "^4.0.4",
+    "koa": "^2.14.2",
+    "koa-body": "^6.0.1",
+    "koa-router": "^12.0.1",
+    "koa-static": "^5.0.0",
+    "pdfjs-dist": "^4.0.269"
+  }
+}
