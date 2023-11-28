@@ -47,7 +47,7 @@ async function renderPDF(pdfBytes) {
         pdf.getOutline().then(outline => {
             const bookmarksContainer = document.getElementById('bookmarks-container');
             bookmarksContainer.innerHTML = ''; // Clear previous bookmarks
-            renderBookmarks(outline, bookmarksContainer);
+            renderBookmarks(outline, bookmarksContainer, pdf);
         });
     });
 }
@@ -157,7 +157,7 @@ function getCurrentPageinView() {
 }
 
 
-function renderBookmarks(bookmarks, container, level = 0) {
+function renderBookmarks(bookmarks, container, pdfDoc, level = 0) {
     if (!bookmarks || bookmarks.length === 0) {
         return;
     }
@@ -171,24 +171,20 @@ function renderBookmarks(bookmarks, container, level = 0) {
         item.textContent = bookmark.title;
         list.appendChild(item);
 
-        // If the bookmark has a destination, make it clickable
-        if (bookmark.dest) {
-            item.style.cursor = 'pointer';
-            item.onclick = () => {
-                pdfjsLib.getDocument(currentPDF).promise.then((pdfDoc) => {
-                    pdfDoc.getDestination(bookmark.dest).then((destination) => {
-                        pdfDoc.getPageIndex(destination[0]).then((pageIndex) => {
-                            // Scroll to the page (adjust as per your rendering logic)
-                            document.getElementById('page-' + (pageIndex + 1)).scrollIntoView();
-                        });
-                    });
-                });
-            };
-        }
+        // Make the bookmark item clickable
+        item.style.cursor = 'pointer';
+        item.onclick = async () => {
+            if (bookmark.dest) {
+                // Resolve the destination and navigate to the specific page
+                const destination = await pdfDoc.getDestination(bookmark.dest);
+                const pageIndex = await pdfDoc.getPageIndex(destination[0]);
+                document.getElementById('page-' + (pageIndex + 1)).scrollIntoView({ behavior: 'smooth' });
+            }
+        };
 
         // Render any child bookmarks
         if (bookmark.items && bookmark.items.length > 0) {
-            renderBookmarks(bookmark.items, container, level + 1);
+            renderBookmarks(bookmark.items, container, pdfDoc, level + 1);
         }
     });
 }
