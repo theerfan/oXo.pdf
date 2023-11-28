@@ -1,6 +1,5 @@
 // Global variables
 let pdfDoc = null;
-let currentPageInView = 1;
 
 async function renderPDF(pdfBytes) {
     // Convert the byte array to a Uint8Array
