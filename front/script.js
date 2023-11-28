@@ -11,6 +11,16 @@ async function renderPDF(pdfBytes) {
         document.getElementById('pdf-container').innerHTML = ''; // Clear existing content
 
         for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+            const pageContainer = document.createElement('div');
+            pageContainer.className = 'page-container';
+            document.getElementById('pdf-container').appendChild(pageContainer);
+
+            // Add the page number element
+            const pageNumberElement = document.createElement('div');
+            pageNumberElement.className = 'page-number';
+            pageNumberElement.innerText = `Page ${pageNum}`;
+            pageContainer.appendChild(pageNumberElement);
+
             pdf.getPage(pageNum).then(page => {
                 const scale = 1.5;
                 const viewport = page.getViewport({ scale: scale });
@@ -25,7 +35,7 @@ async function renderPDF(pdfBytes) {
                 canvas.style.marginRight = 'auto';
                 canvas.style.display = 'block';
 
-                document.getElementById('pdf-container').appendChild(canvas);
+                pageContainer.appendChild(canvas);
 
                 const renderContext = {
                     canvasContext: context,
@@ -74,7 +84,6 @@ document.getElementById('insert-blank-page').addEventListener('click', async () 
     const insertAt = parseInt(document.getElementById('insert-page-number').value);
     if (insertAt > 0 && insertAt <= pdfDoc.getPageCount() + 1) {
         // Create a blank page. You can set the size as needed (default is A4)
-        // const blankPage = pdfDoc.insertPage(insertAt - 1, PDFLib.PDFPage.createEmpty(PDFLib.StandardSizes.A4));
         const blankPage = pdfDoc.insertPage(insertAt - 1, PDFLib.PageSizes.Letter);
         const pdfBytes = await pdfDoc.save();
 
