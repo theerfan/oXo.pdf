@@ -1,14 +1,50 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-    <title>PDF Viewer</title>
+    <title>PDF Editor</title>
+    <style>
+        #toolbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: #f8f8f8;
+            border-bottom: 1px solid #e7e7e7;
+            padding: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+        }
+
+        body {
+            padding-top: 70px;
+            /* Add padding to prevent content from hiding behind the toolbar */
+        }
+    </style>
 </head>
+
 <body>
-    <input type="file" id="file-input" accept="application/pdf"/>
-    <input type="number" id="page-number" placeholder="Page number to delete"/>
-    <button id="delete-page">Delete Page</button>
-    <br/>
-    <a id="download-link" style="display:none;">Download Modified PDF</a>
+    <div id="toolbar">
+        <input type="file" id="file-input" accept="application/pdf" />
+        <br />
+
+        <input type="number" id="page-number" placeholder="Page number to delete" />
+        <button id="delete-page">Delete Page</button>
+        <br />
+
+        <a id="download-link" style="display:none;">Download Modified PDF</a>
+        <br />
+
+        <input type="number" id="insert-page-number" placeholder="Page number to insert blank page" />
+        <button id="insert-blank-page">Insert Blank Page</button>
+        <br />
+
+        <input type="number" id="rotation-degree" placeholder="Degrees to rotate (clockwise)" />
+        <button id="rotate-page">Rotate Current Page</button>
+        <br />
+    </div>
+
+    <!-- The rest of your content goes here -->
     <div id="pdf-container"></div>
 
     <!-- Include pdf.js library -->
@@ -16,4 +52,5 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
     <script src="script.js"></script>
 </body>
+
 </html>
