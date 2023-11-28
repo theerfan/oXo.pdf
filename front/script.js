@@ -43,6 +43,12 @@ async function renderPDF(pdfBytes) {
                 page.render(renderContext);
             });
         }
+
+        pdf.getOutline().then(outline => {
+            const bookmarksContainer = document.getElementById('bookmarks-container');
+            bookmarksContainer.innerHTML = ''; // Clear previous bookmarks
+            renderBookmarks(outline, bookmarksContainer);
+        });
     });
 }
 
@@ -148,4 +154,41 @@ function getCurrentPageinView() {
         }
     }
     return mostVisiblePage;
+}
+
+
+function renderBookmarks(bookmarks, container, level = 0) {
+    if (!bookmarks || bookmarks.length === 0) {
+        return;
+    }
+
+    const list = document.createElement('ul');
+    list.style.paddingLeft = `${level * 20}px`; // Indentation for nested bookmarks
+    container.appendChild(list);
+
+    bookmarks.forEach(bookmark => {
+        const item = document.createElement('li');
+        item.textContent = bookmark.title;
+        list.appendChild(item);
+
+        // If the bookmark has a destination, make it clickable
+        if (bookmark.dest) {
+            item.style.cursor = 'pointer';
+            item.onclick = () => {
+                pdfjsLib.getDocument(currentPDF).promise.then((pdfDoc) => {
+                    pdfDoc.getDestination(bookmark.dest).then((destination) => {
+                        pdfDoc.getPageIndex(destination[0]).then((pageIndex) => {
+                            // Scroll to the page (adjust as per your rendering logic)
+                            document.getElementById('page-' + (pageIndex + 1)).scrollIntoView();
+                        });
+                    });
+                });
+            };
+        }
+
+        // Render any child bookmarks
+        if (bookmark.items && bookmark.items.length > 0) {
+            renderBookmarks(bookmark.items, container, level + 1);
+        }
+    });
 }
