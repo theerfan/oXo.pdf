@@ -1,0 +1,39 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Display</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.6.347/pdf.min.js"></script>
+    <script>
+        async function displayPDF(url) {
+            // import pdfjs library
+            const pdfjsLib = window['pdfjs-dist/build/pdf'];
+            // Ensure the workerSrc is set
+            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.6.347/pdf.worker.entry.js';
+
+            try {
+                const pdf = await pdfjsLib.getDocument(url).promise;
+
+                // Example: Display the first page
+                const page = await pdf.getPage(1);
+                const canvas = document.getElementById('pdf-canvas');
+                const context = canvas.getContext('2d');
+                const viewport = page.getViewport({ scale: 1.5 });
+
+                canvas.height = viewport.height;
+                canvas.width = viewport.width;
+
+                await page.render({ canvasContext: context, viewport }).promise;
+            } catch (error) {
+                console.error('Error loading PDF: ', error);
+            }
+        }
+    </script>
+</head>
+<body>
+    <canvas id="pdf-canvas"></canvas>
+    <button onclick="displayPDF('https://math.mit.edu/~goemans/18310S15/chernoff-notes.pdf')">Display PDF</button>
+</body>
+</html>
