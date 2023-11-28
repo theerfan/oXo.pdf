@@ -5,10 +5,15 @@
 </head>
 <body>
     <input type="file" id="file-input" accept="application/pdf"/>
+    <input type="number" id="page-number" placeholder="Page number to delete"/>
+    <button id="delete-page">Delete Page</button>
+    <br/>
+    <a id="download-link" style="display:none;">Download Modified PDF</a>
     <div id="pdf-container"></div>
 
     <!-- Include pdf.js library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.6.347/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
