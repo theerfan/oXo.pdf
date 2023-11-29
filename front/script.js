@@ -175,9 +175,10 @@ function renderBookmarks(bookmarks, container, pdfDoc, level = 0) {
         item.style.cursor = 'pointer';
         item.onclick = async () => {
             if (bookmark.dest) {
+                const pageRef = bookmark.dest[0];
                 // Resolve the destination and navigate to the specific page
-                const destination = await pdfDoc.getDestination(bookmark.dest);
-                const pageIndex = await pdfDoc.getPageIndex(destination[0]);
+                // const destination = await pdfDoc.getDestination(dest);
+                const pageIndex = await pdfDoc.getPageIndex(pageRef);
                 document.getElementById('page-' + (pageIndex + 1)).scrollIntoView({ behavior: 'smooth' });
             }
         };
