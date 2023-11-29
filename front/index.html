@@ -57,6 +57,11 @@
         #extract-container button {
             margin: 5px;
         }
+        
+        #tab-content {
+            display: block;
+        }
+
     </style>
 </head>
 
@@ -75,6 +80,11 @@
     <input type="file" id="file-input" accept="application/pdf" />
     <br />
 
+    <a id="download-link" style="display:none;">Download Modified PDF</a>
+    <br />
+
+    <div id="bookmarks-container"></div>
+
     <div id="delete" class="tab-content">
         <div id="delete-container">
             <h3>Delete PDF Page</h3>
@@ -82,9 +92,6 @@
             <button id="delete-page">Delete Page</button>
         </div>
     </div>
-
-    <a id="download-link" style="display:none;">Download Modified PDF</a>
-    <br />
 
     <div id="insert" class="tab-content">
         <div id="insert-container">
@@ -142,12 +149,6 @@
         </div>
     </div>
 
-
-    <!-- </div> -->
-
-
-    <div id="bookmarks-container"></div>
-
     <!-- The rest of your content goes here -->
     <div id="pdf-container"></div>
 
@@ -166,6 +167,7 @@
             }
             document.getElementById(tabName).style.display = "block";
         }
+        openTab('merge');
     </script>
 </body>
 
