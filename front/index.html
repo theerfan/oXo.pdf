@@ -68,6 +68,13 @@
             <button id="merge-pdfs">Merge PDFs</button>
         </div>
 
+        <div id="extract-container">
+            <h3>Extract Page as Image</h3>
+            <input type="number" id="extract-page-number" placeholder="Page number" min="1" />
+            <button id="extract-page">Extract Page</button>
+            <img id="extracted-page-img" style="display: none;" />
+        </div>
+
     </div>
 
 
@@ -109,6 +116,18 @@
 
     #add-pdf-input {
         margin-right: 5px;
+    }
+
+    #extract-container {
+        margin-top: 20px;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+    }
+
+    #extract-container input,
+    #extract-container button {
+        margin: 5px;
     }
 
     /* ... other styles ... */

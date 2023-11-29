@@ -1,5 +1,6 @@
 // Global variables
 let pdfDoc = null;
+let pdfFile = null;
 
 async function renderPDF(pdfBytes) {
     // Convert the byte array to a Uint8Array
@@ -7,6 +8,7 @@ async function renderPDF(pdfBytes) {
 
     // Load the PDF file using pdf.js
     pdfjsLib.getDocument({ data: typedArray }).promise.then(pdf => {
+        pdfFile = pdf;
         document.getElementById('pdf-container').innerHTML = ''; // Clear existing content
 
         for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
@@ -71,6 +73,7 @@ document.getElementById('delete-page').addEventListener('click', async () => {
         pdfDoc.removePage(pageNumber - 1);
         const pdfBytes = await pdfDoc.save();
 
+        // Render the new PDF
         renderPDF(pdfBytes);
 
         const blob = new Blob([pdfBytes], { type: 'application/pdf' });
@@ -92,6 +95,7 @@ document.getElementById('insert-blank-page').addEventListener('click', async () 
         const blankPage = pdfDoc.insertPage(insertAt - 1, PDFLib.PageSizes.Letter);
         const pdfBytes = await pdfDoc.save();
 
+        // render the new PDF
         renderPDF(pdfBytes);
 
         // Update download link
@@ -228,7 +232,8 @@ document.getElementById('crop-page').addEventListener('click', async () => {
         // Call the cropPage function (assuming pdfDoc is your loaded PDFDocument instance)
         try {
             const croppedPdfBytes = await cropPage(pageNumber, { x, y, width, height }, pdfDoc);
-
+            // Render the cropped PDF
+            renderPDF(croppedPdfBytes);
             // Do something with the cropped PDF, e.g., display or download it
             // For example, to download the cropped PDF:
             const blob = new Blob([croppedPdfBytes], { type: 'application/pdf' });
@@ -307,5 +312,40 @@ document.getElementById('merge-pdfs').addEventListener('click', async () => {
         }
     } else {
         alert('Please select at least two PDF files to merge.');
+    }
+});
+
+
+document.getElementById('extract-page').addEventListener('click', async () => {
+    const pageNumber = parseInt(document.getElementById('extract-page-number').value);
+    if (isNaN(pageNumber) || pageNumber < 1) {
+        alert('Please enter a valid page number.');
+        return;
+    }
+
+    // Assuming `pdfDoc` is the PDFDocumentProxy object from pdf.js
+    // and is already loaded elsewhere in your script.
+    try {
+        const page = await pdfFile.getPage(pageNumber);
+        const viewport = page.getViewport({ scale: 1.5 }); // Adjust scale as needed
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+        canvas.height = viewport.height;
+        canvas.width = viewport.width;
+
+        await page.render({ canvasContext: context, viewport: viewport }).promise;
+
+        // Convert canvas to an image
+        const img = document.getElementById('extracted-page-img');
+        img.src = canvas.toDataURL('image/png');
+        img.style.display = 'block';
+
+        // Optionally, download the image
+        const link = document.createElement('a');
+        link.href = img.src;
+        link.download = 'extracted_page.png';
+        link.click();
+    } catch (error) {
+        console.error('Error extracting page:', error);
     }
 });
