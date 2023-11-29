@@ -53,7 +53,21 @@
             <button id="crop-page">Crop Page</button>
         </div>
         <br />
-    
+
+        <div id="merge-container">
+            <h3>Merge Multiple PDFs</h3>
+            <div id="pdf-inputs-container">
+                <div class="pdf-input-container">
+                    <input type="file" class="pdf-input" accept="application/pdf" />
+                </div>
+                <div class="pdf-input-container">
+                    <input type="file" class="pdf-input" accept="application/pdf" />
+                </div>
+            </div>
+            <button id="add-pdf-input">Add Another PDF</button>
+            <button id="merge-pdfs">Merge PDFs</button>
+        </div>
+
     </div>
 
 
@@ -72,20 +86,30 @@
 </html>
 
 <style>
-    /* ... existing styles ... */
-  
     #crop-container {
-      margin-top: 20px;
-      padding: 10px;
-      border: 1px solid #ddd;
-      border-radius: 5px;
+        margin-top: 20px;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
     }
-  
+
     #crop-container input,
     #crop-container button {
-      margin: 5px;
+        margin: 5px;
     }
-  
+
+    #pdf-inputs-container {
+        margin-bottom: 10px;
+    }
+
+    .pdf-input {
+        display: block;
+        margin-top: 5px;
+    }
+
+    #add-pdf-input {
+        margin-right: 5px;
+    }
+
     /* ... other styles ... */
-  </style>
-  
+</style>

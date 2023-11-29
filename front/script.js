@@ -243,3 +243,69 @@ document.getElementById('crop-page').addEventListener('click', async () => {
         alert('Please enter valid crop dimensions.');
     }
 });
+
+// Function to add more PDF input fields
+document.getElementById('add-pdf-input').addEventListener('click', () => {
+    const container = document.getElementById('pdf-inputs-container');
+    const inputContainer = document.createElement('div');
+    inputContainer.className = 'pdf-input-container';
+
+    const newInput = document.createElement('input');
+    newInput.type = 'file';
+    newInput.className = 'pdf-input';
+    newInput.accept = 'application/pdf';
+    inputContainer.appendChild(newInput);
+
+    const removeButton = document.createElement('button');
+    removeButton.textContent = 'Remove';
+    removeButton.type = 'button';
+    removeButton.onclick = function () {
+        // Remove this input container
+        container.removeChild(inputContainer);
+    };
+    inputContainer.appendChild(removeButton);
+
+    container.appendChild(inputContainer);
+});
+
+// Function to merge PDFs from all file inputs
+async function mergeMultiplePdfs(pdfBytesArray) {
+    const mergedPdf = await PDFLib.PDFDocument.create();
+
+    for (const pdfBytes of pdfBytesArray) {
+        const pdf = await PDFLib.PDFDocument.load(pdfBytes);
+        const pages = await mergedPdf.copyPages(pdf, pdf.getPageIndices());
+        pages.forEach(page => mergedPdf.addPage(page));
+    }
+
+    return await mergedPdf.save();
+}
+
+// Event listener for the merge button
+document.getElementById('merge-pdfs').addEventListener('click', async () => {
+    const pdfInputs = document.querySelectorAll('.pdf-input');
+    const files = Array.from(pdfInputs)
+        .map(input => input.files[0])
+        .filter(Boolean); // Filter out any undefined or null entries
+
+    if (files.length > 1) {
+        // Convert the files to byte arrays
+        const pdfBytesArray = await Promise.all(files.map(file => file.arrayBuffer()));
+
+        // Call the mergeMultiplePdfs function
+        try {
+            const mergedPdfBytes = await mergeMultiplePdfs(pdfBytesArray);
+
+            // Create a Blob from the bytes and trigger a download
+            const blob = new Blob([mergedPdfBytes], { type: 'application/pdf' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'merged_document.pdf';
+            link.click();
+        } catch (error) {
+            console.error('Error merging PDFs:', error);
+        }
+    } else {
+        alert('Please select at least two PDF files to merge.');
+    }
+});
