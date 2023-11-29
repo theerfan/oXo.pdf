@@ -42,7 +42,20 @@
         <input type="number" id="rotation-degree" placeholder="Degrees to rotate (clockwise)" />
         <button id="rotate-page">Rotate Current Page</button>
         <br />
+
+        <div id="crop-container">
+            <h3>Crop PDF Page</h3>
+            <input type="number" id="crop-page-number" placeholder="Page number" min="1" />
+            <input type="number" id="crop-x" placeholder="X coordinate" min="0" />
+            <input type="number" id="crop-y" placeholder="Y coordinate" min="0" />
+            <input type="number" id="crop-width" placeholder="Width" min="0" />
+            <input type="number" id="crop-height" placeholder="Height" min="0" />
+            <button id="crop-page">Crop Page</button>
+        </div>
+        <br />
+    
     </div>
+
 
     <div id="bookmarks-container"></div>
 
@@ -57,3 +70,22 @@
 </body>
 
 </html>
+
+<style>
+    /* ... existing styles ... */
+  
+    #crop-container {
+      margin-top: 20px;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+    }
+  
+    #crop-container input,
+    #crop-container button {
+      margin: 5px;
+    }
+  
+    /* ... other styles ... */
+  </style>
+  

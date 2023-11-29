@@ -189,3 +189,57 @@ function renderBookmarks(bookmarks, container, pdfDoc, level = 0) {
         }
     });
 }
+
+// Function to crop a page in a PDF
+// pageToCrop: the 0-indexed page number to crop
+// cropRect: { x, y, width, height } defines the crop rectangle
+// pdfDoc: an instance of PDFDocument from pdf-lib
+
+async function cropPage(pageToCrop, cropRect, pdfDoc) {
+    // Get the page
+    const page = pdfDoc.getPages()[pageToCrop];
+
+    // Calculate the new crop box
+    const cropBox = [
+        cropRect.x,
+        page.getHeight() - cropRect.y - cropRect.height,
+        cropRect.x + cropRect.width,
+        page.getHeight() - cropRect.y
+    ];
+
+    // Set the crop box
+    page.setCropBox(cropBox[0], cropBox[1], cropBox[2], cropBox[3]);
+
+    // Serialize the PDFDocument to bytes (a Uint8Array)
+    return await pdfDoc.save();
+}
+
+
+document.getElementById('crop-page').addEventListener('click', async () => {
+    // Retrieve values from form
+    const pageNumber = parseInt(document.getElementById('crop-page-number').value, 10) - 1; // Convert to 0-index
+    const x = parseFloat(document.getElementById('crop-x').value);
+    const y = parseFloat(document.getElementById('crop-y').value);
+    const width = parseFloat(document.getElementById('crop-width').value);
+    const height = parseFloat(document.getElementById('crop-height').value);
+
+    // Ensure valid inputs
+    if (pageNumber >= 0 && x >= 0 && y >= 0 && width > 0 && height > 0) {
+        // Call the cropPage function (assuming pdfDoc is your loaded PDFDocument instance)
+        try {
+            const croppedPdfBytes = await cropPage(pageNumber, { x, y, width, height }, pdfDoc);
+
+            // Do something with the cropped PDF, e.g., display or download it
+            // For example, to download the cropped PDF:
+            const blob = new Blob([croppedPdfBytes], { type: 'application/pdf' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'cropped_document.pdf';
+            link.click();
+        } catch (error) {
+            console.error('Error cropping page:', error);
+        }
+    } else {
+        alert('Please enter valid crop dimensions.');
+    }
+});
