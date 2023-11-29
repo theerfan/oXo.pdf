@@ -20,29 +20,90 @@
             padding-top: 70px;
             /* Add padding to prevent content from hiding behind the toolbar */
         }
+
+        #crop-container {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        #crop-container input,
+        #crop-container button {
+            margin: 5px;
+        }
+
+        #pdf-inputs-container {
+            margin-bottom: 10px;
+        }
+
+        .pdf-input {
+            display: block;
+            margin-top: 5px;
+        }
+
+        #add-pdf-input {
+            margin-right: 5px;
+        }
+
+        #extract-container {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        #extract-container input,
+        #extract-container button {
+            margin: 5px;
+        }
     </style>
 </head>
 
 <body>
     <div id="toolbar">
-        <input type="file" id="file-input" accept="application/pdf" />
-        <br />
+        <!-- Tab buttons -->
+        <button class="tab-button" onclick="openTab('merge')">Merge PDFs</button>
+        <button class="tab-button" onclick="openTab('extract')">Extract Page</button>
+        <button class="tab-button" onclick="openTab('crop')">Crop Page</button>
+        <button class="tab-button" onclick="openTab('delete')">Delete Page</button>
+        <button class="tab-button" onclick="openTab('insert')">Insert Page</button>
+        <button class="tab-button" onclick="openTab('rotate')">Rotate Page</button>
+    </div>
 
-        <input type="number" id="page-number" placeholder="Page number to delete" />
-        <button id="delete-page">Delete Page</button>
-        <br />
+    <!-- <div id="toolbar"> -->
+    <input type="file" id="file-input" accept="application/pdf" />
+    <br />
 
-        <a id="download-link" style="display:none;">Download Modified PDF</a>
-        <br />
+    <div id="delete" class="tab-content">
+        <div id="delete-container">
+            <h3>Delete PDF Page</h3>
+            <input type="number" id="delete-page-number" placeholder="Page number" min="1" />
+            <button id="delete-page">Delete Page</button>
+        </div>
+    </div>
 
-        <input type="number" id="insert-page-number" placeholder="Page number to insert blank page" />
-        <button id="insert-blank-page">Insert Blank Page</button>
-        <br />
+    <a id="download-link" style="display:none;">Download Modified PDF</a>
+    <br />
 
-        <input type="number" id="rotation-degree" placeholder="Degrees to rotate (clockwise)" />
-        <button id="rotate-page">Rotate Current Page</button>
-        <br />
+    <div id="insert" class="tab-content">
+        <div id="insert-container">
+            <h3>Insert Blank Page</h3>
+            <input type="number" id="insert-page-number" placeholder="Page number to insert blank page" />
+            <button id="insert-blank-page">Insert Blank Page</button>
+        </div>
+    </div>
 
+    <div id="rotate" class="tab-content">
+        <div id="rotate-container">
+            <h3>Rotate PDF Page</h3>
+            <input type="number" id="rotate-page-number" placeholder="Page number" min="1" />
+            <input type="number" id="rotation-degree" placeholder="Degrees to rotate (clockwise)" />
+            <button id="rotate-page">Rotate Page</button>
+        </div>
+    </div>
+
+    <div id="crop" class="tab-content">
         <div id="crop-container">
             <h3>Crop PDF Page</h3>
             <input type="number" id="crop-page-number" placeholder="Page number" min="1" />
@@ -52,8 +113,11 @@
             <input type="number" id="crop-height" placeholder="Height" min="0" />
             <button id="crop-page">Crop Page</button>
         </div>
-        <br />
+    </div>
 
+    <br />
+
+    <div id="merge" class="tab-content">
         <div id="merge-container">
             <h3>Merge Multiple PDFs</h3>
             <div id="pdf-inputs-container">
@@ -67,15 +131,19 @@
             <button id="add-pdf-input">Add Another PDF</button>
             <button id="merge-pdfs">Merge PDFs</button>
         </div>
+    </div>
 
+    <div id="extract" class="tab-content">
         <div id="extract-container">
             <h3>Extract Page as Image</h3>
             <input type="number" id="extract-page-number" placeholder="Page number" min="1" />
             <button id="extract-page">Extract Page</button>
             <img id="extracted-page-img" style="display: none;" />
         </div>
-
     </div>
+
+
+    <!-- </div> -->
 
 
     <div id="bookmarks-container"></div>
@@ -88,47 +156,21 @@
     <script> pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.6.347/pdf.worker.min.js'; </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
     <script src="script.js"></script>
+    <script>
+        // JavaScript for tab functionality
+        function openTab(tabName) {
+            var i, tabcontent;
+            tabcontent = document.getElementsByClassName("tab-content");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].style.display = "none";
+            }
+            document.getElementById(tabName).style.display = "block";
+        }
+    </script>
 </body>
 
 </html>
 
 <style>
-    #crop-container {
-        margin-top: 20px;
-        padding: 10px;
-        border: 1px solid #ddd;
-        border-radius: 5px;
-    }
-
-    #crop-container input,
-    #crop-container button {
-        margin: 5px;
-    }
-
-    #pdf-inputs-container {
-        margin-bottom: 10px;
-    }
-
-    .pdf-input {
-        display: block;
-        margin-top: 5px;
-    }
-
-    #add-pdf-input {
-        margin-right: 5px;
-    }
-
-    #extract-container {
-        margin-top: 20px;
-        padding: 10px;
-        border: 1px solid #ddd;
-        border-radius: 5px;
-    }
-
-    #extract-container input,
-    #extract-container button {
-        margin: 5px;
-    }
-
     /* ... other styles ... */
 </style>
