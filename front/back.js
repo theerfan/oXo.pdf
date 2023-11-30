@@ -91,8 +91,13 @@ document.getElementById('delete-page').addEventListener('click', async () => {
 document.getElementById('insert-blank-page').addEventListener('click', async () => {
     const insertAt = parseInt(document.getElementById('insert-page-number').value);
     if (insertAt > 0 && insertAt <= pdfDoc.getPageCount() + 1) {
-        // Create a blank page. You can set the size as needed (default is A4)
-        const blankPage = pdfDoc.insertPage(insertAt - 1, PDFLib.PageSizes.Letter);
+        // Create a blank page. You can set the size as needed 
+        // Get the page size of the page after which you want to insert the blank page
+        // If there is no page after the specified position, get the page size of the first page
+        const pageSize = insertAt === pdfDoc.getPageCount() + 1 ?
+            pdfDoc.getPage(0).getSize() : pdfDoc.getPage(insertAt).getSize();
+        const pagesizeList = [pageSize.width, pageSize.height]
+        const blankPage = pdfDoc.insertPage(insertAt - 1, pagesizeList);
         const pdfBytes = await pdfDoc.save();
 
         // render the new PDF
