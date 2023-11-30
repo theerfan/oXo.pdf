@@ -189,22 +189,11 @@ function renderBookmarks(bookmarks, container, pdfDoc, level = 0) {
 async function cropPage(pageToCrop, cropRect, pdfDoc) {
     // Get the page
     const page = pdfDoc.getPages()[pageToCrop];
-    const prevCropbox = page.getCropBox();
-    const pdfContainer = document.getElementById('pdf-viewer-container');
-
-    // Calculate the new crop box
-    // (lower left corner of the page is the origin)
-    const cropBox = [
-        cropRect.x,
-        cropRect.y,
-        // page.getHeight() - cropRect.y - cropRect.height,
-        cropRect.width,
-        cropRect.height
-        // page.getHeight() - cropRect.y
-    ];
+    // const prevCropbox = page.getCropBox();
+    // const pdfContainer = document.getElementById('pdf-viewer-container');
 
     // Set the crop box
-    page.setCropBox(cropBox[0], cropBox[1], cropBox[2], cropBox[3]);
+    page.setCropBox(cropRect.x, cropRect.y, cropRect.width, cropRect.height);
 
     // Serialize the PDFDocument to bytes (a Uint8Array)
     return await pdfDoc.save();
@@ -354,48 +343,36 @@ document.getElementById('start-crop').addEventListener('click', function () {
 
 // Confirm crop button logic
 document.getElementById('confirm-crop').addEventListener('click', async () => {
-    const cropOverlay = document.getElementById('crop-overlay');
-    const cropRect = cropOverlay.getBoundingClientRect();
     const currentPageNumber = getCurrentPageinView() - 1;
-    const pdfPage = pdfDoc.getPage(currentPageNumber);
-    const { x, y, width, height } = pdfPage.getMediaBox();
-    const pageElement = document.getElementById(`page-${currentPageNumber + 1}`);
-    const pageRect = pageElement.getBoundingClientRect();
-    const pdfContainer = document.getElementById('pdf-viewer-container');
-    const pdfContainerRect = pdfContainer.getBoundingClientRect();
+    const currentPage = pdfDoc.getPage(currentPageNumber);
+    const { x, y, width: actualWidth, height: actualHeight } = currentPage.getMediaBox();
+    const currentPageElement = document.getElementById(`page-${currentPageNumber + 1}`);
+    const pageRect = currentPageElement.getBoundingClientRect();
 
-    const { x: totalOffsetX, y: totalOffsetY } = getTotalOffset(pdfContainer);
+    // We use the position of the handles to determine the crop rectangle
+    const leftHandle = document.getElementById('left-handle');
+    const rightHandle = document.getElementById('right-handle');
+    const topHandle = document.getElementById('top-handle');
+    const bottomHandle = document.getElementById('bottom-handle');
 
-    const pageRenderedWidth = pageElement.width;
-    const pageRenderedHeight = pageElement.height;
+    const scaleX = currentPageElement.width / actualWidth;
+    const scaleY = currentPageElement.height / actualHeight;
 
-    const pageActualWidth = width;
-    const pageActualHeight = height;
+    const cropRect = {
+        x: leftHandle.getBoundingClientRect().left - pageRect.left,
+        y: topHandle.getBoundingClientRect().top - pageRect.top,
+        width: (rightHandle.getBoundingClientRect().left - leftHandle.getBoundingClientRect().left) / scaleX,
+        height: (bottomHandle.getBoundingClientRect().top - topHandle.getBoundingClientRect().top) / scaleY
+    };
 
-    const scaleX = pageRenderedWidth / pageActualWidth;
-    const scaleY = pageRenderedHeight / pageActualHeight;
-
-    // Translate HTML coordinates to PDF coordinates
-    // Adjust for any offsets if your PDF is not rendered at the top-left corner of `pdf-container`
-    let pdfX = (cropRect.left - totalOffsetX) / scaleX;
-    let pdfY = (cropRect.top - totalOffsetY) / scaleY;
-
-    // Convert y-coordinate from top-left to bottom-left origin
-    pdfY = pageActualHeight - pdfY - (cropRect.height / scaleY);
-
-    // Width and height scale
-    let pageWidth = cropRect.width / scaleX;
-    let pageHeight = cropRect.height / scaleY;
-
-    const adjustedCropRect = { x: pdfX, y: pdfY, width: pageWidth, height: pageHeight };
-
-    const pdfBytes = await cropPage(currentPageNumber, adjustedCropRect, pdfDoc);
+    const pdfBytes = await cropPage(currentPageNumber, cropRect, pdfDoc);
 
     renderPDF(pdfBytes);
 
     document.getElementById('crop-overlay').style.display = 'none';
 
     cropMode = false;
+    previousPageforOverlay = -1;
 });
 
 // Make shit draggable
@@ -413,15 +390,15 @@ window.addEventListener('scroll', function () {
     }
 });
 
-let previousPageforOverlay = 0;
+let previousPageforOverlay = -1;
 
 function setCropOverlayPosition() {
-    const cropOverlay = document.getElementById('crop-overlay');
-    const pdfContainer = document.getElementById('pdf-container');
-    const pdfViewerContainer = document.getElementById('pdf-viewer-container');
-    // Change the crop area to match the current page size of the PDF container
     const currentPage = getCurrentPageinView();
     if (previousPageforOverlay != currentPage) {
+        const cropOverlay = document.getElementById('crop-overlay');
+        const pdfContainer = document.getElementById('pdf-container');
+        const pdfViewerContainer = document.getElementById('pdf-viewer-container');
+        // Change the crop area to match the current page size of the PDF container
         // Get the element for the current page
         const page = document.getElementById(`page-${currentPage}`);
         const rect = page.getBoundingClientRect();
