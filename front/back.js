@@ -168,6 +168,7 @@ function getCurrentPageinView() {
 // Function to render the bookmarks
 function renderBookmarks(bookmarks, container, pdfDoc, level = 0) {
     if (!bookmarks || bookmarks.length === 0) {
+        container.style.display = 'none';
         return;
     }
 

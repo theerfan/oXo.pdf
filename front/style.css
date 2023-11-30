@@ -15,12 +15,12 @@ body {
     /* Add padding to prevent content from hiding behind the toolbar */
 }
 
-#crop-container {
+/* #crop-container {
     margin-top: 20px;
     padding: 10px;
     border: 1px solid #ddd;
     border-radius: 5px;
-}
+} */
 
 #crop-container input,
 #crop-container button {
@@ -40,12 +40,12 @@ body {
     margin-right: 5px;
 }
 
-#extract-container {
+/* #extract-container {
     margin-top: 20px;
     padding: 10px;
     border: 1px solid #ddd;
     border-radius: 5px;
-}
+} */
 
 #extract-container input,
 #extract-container button {
