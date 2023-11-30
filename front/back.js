@@ -74,7 +74,6 @@ document.getElementById('file-input').addEventListener('change', async (event) =
 // Deletes the page specified by the user
 document.getElementById('delete-page').addEventListener('click', async () => {
     const pageNumber = parseInt(document.getElementById('delete-page-number').value);
-    // const pageNumber = getCurrentPageinView();
     if (pageNumber > 0 && pageNumber <= pdfDoc.getPageCount()) {
         pdfDoc.removePage(pageNumber - 1);
         const pdfBytes = await pdfDoc.save();
@@ -189,8 +188,6 @@ function renderBookmarks(bookmarks, container, pdfDoc, level = 0) {
 async function cropPage(pageToCrop, cropRect, pdfDoc) {
     // Get the page
     const page = pdfDoc.getPages()[pageToCrop];
-    // const prevCropbox = page.getCropBox();
-    // const pdfContainer = document.getElementById('pdf-viewer-container');
 
     // Set the crop box
     page.setCropBox(cropRect.x, cropRect.y, cropRect.width, cropRect.height);
@@ -332,7 +329,6 @@ document.getElementById('download-page').addEventListener('click', async () => {
 
 
 // Visual cropping stuff
-
 let cropMode = false;
 
 document.getElementById('start-crop').addEventListener('click', function () {
@@ -377,6 +373,8 @@ document.getElementById('confirm-crop').addEventListener('click', async () => {
 
 // Make shit draggable
 
+let browserZoomLevel = Math.round(window.devicePixelRatio * 100);
+
 // Adjust the position of the crop-overlay when window is resized (zoom changes)
 window.addEventListener('resize', function () {
     if (cropMode) {
@@ -394,7 +392,9 @@ let previousPageforOverlay = -1;
 
 function setCropOverlayPosition() {
     const currentPage = getCurrentPageinView();
-    if (previousPageforOverlay != currentPage) {
+    let newZoomLevel = Math.round(window.devicePixelRatio * 100);
+    if (previousPageforOverlay != currentPage || newZoomLevel != browserZoomLevel) {
+        browserZoomLevel = newZoomLevel;
         const cropOverlay = document.getElementById('crop-overlay');
         const pdfContainer = document.getElementById('pdf-container');
         const pdfViewerContainer = document.getElementById('pdf-viewer-container');
