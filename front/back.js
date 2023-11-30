@@ -429,3 +429,71 @@ function setCropOverlayPosition() {
     cropOverlay.style.top = (rect.top + window.scrollY - pdfViewerContainer.offsetTop) + 'px';
     cropOverlay.style.display = 'block';
 }
+
+let resizing = false;
+let resizeDirection = '';
+
+// Function to update the overlay's size
+function resizeOverlay(mouseX) {
+    const cropOverlay = document.getElementById('crop-overlay');
+    // const rect = cropOverlay.getBoundingClientRect();
+
+    if (resizeDirection === 'left') {
+        const oldWidth = parseInt(cropOverlay.style.width.replace('px', ''));
+        const oldLeft = parseInt(cropOverlay.style.left.replace('px', ''));
+        const newWidth = oldWidth + (oldLeft - mouseX);
+        if (newWidth > 0) {
+            cropOverlay.style.width = newWidth + 'px';
+            cropOverlay.style.left = mouseX + 'px';
+        }
+    }
+    else if (resizeDirection === 'right') {
+        const newWidth = mouseX - parseInt(cropOverlay.style.left.replace('px', ''));
+        if (newWidth > 0) {
+            cropOverlay.style.width = newWidth + 'px';
+        }
+    }
+    else if (resizeDirection === 'top') {
+        const oldHeight = parseInt(cropOverlay.style.height.replace('px', ''));
+        const oldTop = parseInt(cropOverlay.style.top.replace('px', ''));
+        const newHeight = oldHeight + (oldTop - mouseX);
+        if (newHeight > 0) {
+            cropOverlay.style.height = newHeight + 'px';
+            cropOverlay.style.top = mouseX + 'px';
+        }
+    }
+    else if (resizeDirection === 'bottom') {
+        const newHeight = mouseX - parseInt(cropOverlay.style.top.replace('px', ''));
+        if (newHeight > 0) {
+            cropOverlay.style.height = newHeight + 'px';
+        }
+    }
+}
+
+function handleMouseDown(resizeDir) {
+    return function (e) {
+        resizing = true;
+        resizeDirection = resizeDir;
+        e.stopPropagation();
+    };
+}
+
+document.getElementById('left-handle').addEventListener('mousedown', handleMouseDown('left'));
+document.getElementById('right-handle').addEventListener('mousedown', handleMouseDown('right'));
+document.getElementById('top-handle').addEventListener('mousedown', handleMouseDown('top'));
+document.getElementById('bottom-handle').addEventListener('mousedown', handleMouseDown('bottom'));
+
+
+
+// Mouse move event to handle resizing
+document.addEventListener('mousemove', function (e) {
+    if (resizing) {
+        resizeOverlay(e.clientX);
+    }
+});
+
+// Mouse up event to stop resizing
+document.addEventListener('mouseup', function () {
+    resizing = false;
+    resizeDirection = '';
+});
