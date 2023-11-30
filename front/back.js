@@ -358,9 +358,13 @@ document.getElementById('confirm-crop').addEventListener('click', async () => {
     const { x, y, width, height } = pdfPage.getMediaBox();
     const pageElement = document.getElementById(`page-${currentPageNumber + 1}`);
     const pdfContainer = document.getElementById('pdf-viewer-container');
+    const pdfContainerRect = pdfContainer.getBoundingClientRect();
 
-    const offsetX = pdfContainer.offsetLeft;
-    const offsetY = pdfContainer.offsetTop;
+    // const offsetX = pdfContainer.offsetLeft;
+    // const offsetY = pdfContainer.offsetTop;
+    const { x: totalOffsetX, y: totalOffsetY } = getTotalOffset(pdfContainer);
+    // const offsetX = pdfContainerRect.left + window.scrollX;
+    // const offsetY = pdfContainerRect.top + window.scrollY;
 
     const pdfRenderedWidth = pageElement.width;
     const pdfRenderedHeight = pageElement.height;
@@ -373,8 +377,8 @@ document.getElementById('confirm-crop').addEventListener('click', async () => {
 
     // Translate HTML coordinates to PDF coordinates
     // Adjust for any offsets if your PDF is not rendered at the top-left corner of `pdf-container`
-    let pdfX = (cropRect.left - offsetX) / scaleX;
-    let pdfY = (cropRect.top - offsetY) / scaleY;
+    let pdfX = (cropRect.left - totalOffsetX) / scaleX;
+    let pdfY = (cropRect.top - totalOffsetY) / scaleY;
 
     // Convert y-coordinate from top-left to bottom-left origin
     pdfY = pdfActualHeight - pdfY - (cropRect.height / scaleY);
@@ -492,3 +496,14 @@ document.addEventListener('mouseup', function () {
     resizing = false;
     resizeDirection = '';
 });
+
+function getTotalOffset(element) {
+    let totalOffsetX = 0;
+    let totalOffsetY = 0;
+    while(element) {
+        totalOffsetX += element.offsetLeft + element.clientLeft - element.scrollLeft;
+        totalOffsetY += element.offsetTop + element.clientTop - element.scrollTop;
+        element = element.offsetParent;
+    }
+    return { x: totalOffsetX, y: totalOffsetY };
+}
