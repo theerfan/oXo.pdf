@@ -2,6 +2,7 @@
 let pdfDoc = null;
 let pdfFile = null;
 
+// Render the PDF file using pdf.js
 async function renderPDF(pdfBytes) {
     // Convert the byte array to a Uint8Array
     const typedArray = new Uint8Array(pdfBytes);
@@ -54,6 +55,7 @@ async function renderPDF(pdfBytes) {
     });
 }
 
+// Gets the PDF file from the input element and renders it to the page
 document.getElementById('file-input').addEventListener('change', async (event) => {
     const file = event.target.files[0];
     if (file.type !== 'application/pdf') {
@@ -67,6 +69,7 @@ document.getElementById('file-input').addEventListener('change', async (event) =
     renderPDF(pdfBytes);
 });
 
+// Deletes the page specified by the user
 document.getElementById('delete-page').addEventListener('click', async () => {
     const pageNumber = parseInt(document.getElementById('page-number').value);
     if (pageNumber > 0 && pageNumber <= pdfDoc.getPageCount()) {
@@ -88,6 +91,7 @@ document.getElementById('delete-page').addEventListener('click', async () => {
     }
 });
 
+// Inserts a blank page at the specified position
 document.getElementById('insert-blank-page').addEventListener('click', async () => {
     const insertAt = parseInt(document.getElementById('insert-page-number').value);
     if (insertAt > 0 && insertAt <= pdfDoc.getPageCount() + 1) {
@@ -111,6 +115,7 @@ document.getElementById('insert-blank-page').addEventListener('click', async () 
     }
 });
 
+// Rotates the page in view by the specified degrees
 document.getElementById('rotate-page').addEventListener('click', async () => {
     const rotationDegrees = parseInt(document.getElementById('rotation-degree').value);
     const currentPageNumber = getCurrentPageinView();
@@ -137,7 +142,7 @@ document.getElementById('rotate-page').addEventListener('click', async () => {
     }
 });
 
-
+// Function to get the current page in view
 function getCurrentPageinView() {
     console.log("here");
     const container = document.getElementById('pdf-container');
@@ -160,7 +165,7 @@ function getCurrentPageinView() {
     return mostVisiblePage;
 }
 
-
+// Function to render the bookmarks
 function renderBookmarks(bookmarks, container, pdfDoc, level = 0) {
     if (!bookmarks || bookmarks.length === 0) {
         return;
@@ -198,7 +203,6 @@ function renderBookmarks(bookmarks, container, pdfDoc, level = 0) {
 // pageToCrop: the 0-indexed page number to crop
 // cropRect: { x, y, width, height } defines the crop rectangle
 // pdfDoc: an instance of PDFDocument from pdf-lib
-
 async function cropPage(pageToCrop, cropRect, pdfDoc) {
     // Get the page
     const page = pdfDoc.getPages()[pageToCrop];
@@ -218,7 +222,7 @@ async function cropPage(pageToCrop, cropRect, pdfDoc) {
     return await pdfDoc.save();
 }
 
-
+// Event listener for the crop button
 document.getElementById('crop-page').addEventListener('click', async () => {
     // Retrieve values from form
     const pageNumber = parseInt(document.getElementById('crop-page-number').value, 10) - 1; // Convert to 0-index
@@ -234,13 +238,12 @@ document.getElementById('crop-page').addEventListener('click', async () => {
             const croppedPdfBytes = await cropPage(pageNumber, { x, y, width, height }, pdfDoc);
             // Render the cropped PDF
             renderPDF(croppedPdfBytes);
-            // Do something with the cropped PDF, e.g., display or download it
-            // For example, to download the cropped PDF:
+            // Add a download link for the cropped PDF
             const blob = new Blob([croppedPdfBytes], { type: 'application/pdf' });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
             link.download = 'cropped_document.pdf';
-            link.click();
+            // link.click();
         } catch (error) {
             console.error('Error cropping page:', error);
         }
@@ -249,7 +252,7 @@ document.getElementById('crop-page').addEventListener('click', async () => {
     }
 });
 
-// Function to add more PDF input fields
+// Add more PDF input fields for the merge function
 document.getElementById('add-pdf-input').addEventListener('click', () => {
     const container = document.getElementById('pdf-inputs-container');
     const inputContainer = document.createElement('div');
@@ -273,7 +276,7 @@ document.getElementById('add-pdf-input').addEventListener('click', () => {
     container.appendChild(inputContainer);
 });
 
-// Function to merge PDFs from all file inputs
+// Merge PDFs from all file inputs
 async function mergeMultiplePdfs(pdfBytesArray) {
     const mergedPdf = await PDFLib.PDFDocument.create();
 
@@ -306,7 +309,7 @@ document.getElementById('merge-pdfs').addEventListener('click', async () => {
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
             link.download = 'merged_document.pdf';
-            link.click();
+            // link.click();
         } catch (error) {
             console.error('Error merging PDFs:', error);
         }
@@ -315,7 +318,7 @@ document.getElementById('merge-pdfs').addEventListener('click', async () => {
     }
 });
 
-
+// Extract a page from a PDF and download it as an image
 document.getElementById('extract-page').addEventListener('click', async () => {
     const pageNumber = parseInt(document.getElementById('extract-page-number').value);
     if (isNaN(pageNumber) || pageNumber < 1) {
@@ -338,13 +341,19 @@ document.getElementById('extract-page').addEventListener('click', async () => {
         // Convert canvas to an image
         const img = document.getElementById('extracted-page-img');
         img.src = canvas.toDataURL('image/png');
-        img.style.display = 'block';
+        // img.style.display = 'block';
 
         // Optionally, download the image
         const link = document.createElement('a');
+        link.textContent = 'Download Extracted Page';
         link.href = img.src;
         link.download = 'extracted_page.png';
-        link.click();
+        // Add the link to the DOM
+        const download_element = document.getElementById('download-link');
+        download_element.innerHTML = '';
+        download_element.appendChild(link);
+        download_element.style.display = 'block';
+        // link.click();
     } catch (error) {
         console.error('Error extracting page:', error);
     }

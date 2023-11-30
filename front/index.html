@@ -3,87 +3,35 @@
 
 <head>
     <title>PDF Editor</title>
-    <style>
-        #toolbar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            background-color: #f8f8f8;
-            border-bottom: 1px solid #e7e7e7;
-            padding: 10px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-            z-index: 1000;
-        }
-
-        body {
-            padding-top: 70px;
-            /* Add padding to prevent content from hiding behind the toolbar */
-        }
-
-        #crop-container {
-            margin-top: 20px;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-        }
-
-        #crop-container input,
-        #crop-container button {
-            margin: 5px;
-        }
-
-        #pdf-inputs-container {
-            margin-bottom: 10px;
-        }
-
-        .pdf-input {
-            display: block;
-            margin-top: 5px;
-        }
-
-        #add-pdf-input {
-            margin-right: 5px;
-        }
-
-        #extract-container {
-            margin-top: 20px;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-        }
-
-        #extract-container input,
-        #extract-container button {
-            margin: 5px;
-        }
-        
-        #tab-content {
-            display: block;
-        }
-
-    </style>
+    <link rel="stylesheet" href="style.css" />
 </head>
 
 <body>
-    <div id="toolbar">
-        <!-- Tab buttons -->
-        <button class="tab-button" onclick="openTab('merge')">Merge PDFs</button>
-        <button class="tab-button" onclick="openTab('extract')">Extract Page</button>
-        <button class="tab-button" onclick="openTab('crop')">Crop Page</button>
-        <button class="tab-button" onclick="openTab('delete')">Delete Page</button>
-        <button class="tab-button" onclick="openTab('insert')">Insert Page</button>
-        <button class="tab-button" onclick="openTab('rotate')">Rotate Page</button>
-    </div>
-
-    <!-- <div id="toolbar"> -->
-    <input type="file" id="file-input" accept="application/pdf" />
-    <br />
-
+    <!-- Place to show PDF download url -->
     <a id="download-link" style="display:none;">Download Modified PDF</a>
     <br />
 
+    <div id="toolbar">
+        <!-- Tab buttons -->
+        <div class="tab">
+            <div class="tab-links tab-load" onclick="openTab('load')">Load a PDF</div>
+            <div class="tab-links tab-merge" onclick="openTab('merge')">Merge PDFs</div>
+            <div class="tab-links tab-extract" onclick="openTab('extract')">Extract Page</div>
+            <div class="tab-links tab-crop" onclick="openTab('crop')">Crop Page</div>
+            <div class="tab-links tab-delete" onclick="openTab('delete')">Delete Page</div>
+            <div class="tab-links tab-insert" onclick="openTab('insert')">Insert Page</div>
+            <div class="tab-links tab-rotate" onclick="openTab('rotate')">Rotate Page</div>
+        </div>  
+    </div>
+
     <div id="bookmarks-container"></div>
+
+    <div id="load" class="tab-content">
+        <div id="load-container">
+            <h3>Load PDF</h3>
+            <input type="file" id="file-input" accept="application/pdf" />
+        </div>
+    </div>
 
     <div id="delete" class="tab-content">
         <div id="delete-container">
@@ -156,18 +104,11 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.6.347/pdf.min.js"></script>
     <script> pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.6.347/pdf.worker.min.js'; </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
-    <script src="script.js"></script>
+    <script src="back.js"></script>
+    <script src="front.js"></script>
+    <!-- To initialize -->
     <script>
-        // JavaScript for tab functionality
-        function openTab(tabName) {
-            var i, tabcontent;
-            tabcontent = document.getElementsByClassName("tab-content");
-            for (i = 0; i < tabcontent.length; i++) {
-                tabcontent[i].style.display = "none";
-            }
-            document.getElementById(tabName).style.display = "block";
-        }
-        openTab('merge');
+        openTab('load');
     </script>
 </body>
 

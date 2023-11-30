@@ -1,0 +1,99 @@
+#toolbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: #f8f8f8;
+    border-bottom: 1px solid #e7e7e7;
+    padding: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+}
+
+body {
+    padding-top: 70px;
+    /* Add padding to prevent content from hiding behind the toolbar */
+}
+
+#crop-container {
+    margin-top: 20px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+#crop-container input,
+#crop-container button {
+    margin: 5px;
+}
+
+#pdf-inputs-container {
+    margin-bottom: 10px;
+}
+
+.pdf-input {
+    display: block;
+    margin-top: 5px;
+}
+
+#add-pdf-input {
+    margin-right: 5px;
+}
+
+#extract-container {
+    margin-top: 20px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+#extract-container input,
+#extract-container button {
+    margin: 5px;
+}
+
+/* Container for tab links */
+.tab {
+    display: flex; /* Aligns children in a row */
+    overflow: hidden;
+    background-color: #f1f1f1;
+    border-bottom: 1px solid #ccc;
+}
+
+/* Style the tab links */
+.tab .tab-links {
+    flex-grow: 1;
+    text-align: center;
+    border: 1px solid #ccc;
+    border-bottom: none; /* Remove bottom border to merge with the content box */
+    outline: none;
+    cursor: pointer;
+    padding: 10px 16px;
+    transition: 0.3s;
+    font-size: 17px;
+    background-color: inherit;
+    margin-right: 2px; /* Creates a small gap between tabs */
+}
+
+/* Last tab link should not have a margin on the right */
+.tab .tab-links:last-child {
+    margin-right: 0;
+}
+
+/* Change background color of tab links on hover */
+.tab .tab-links:hover {
+    background-color: #ddd;
+}
+
+/* Create an active/current tablink class */
+.tab .tab-links.active {
+    background-color: #ccc;
+    border-bottom: 1px solid white; /* To blend with the content box */
+}
+
+/* Style the tab content */
+.tab-content {
+    display: none;
+    padding: 6px 12px;
+    border: 1px solid #ccc;
+}
