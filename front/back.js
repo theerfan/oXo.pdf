@@ -195,7 +195,7 @@ async function cropPage(pageToCrop, cropRect, pdfDoc) {
     // Calculate the new crop box
     // (lower left corner of the page is the origin)
     const cropBox = [
-        cropRect.x - pdfContainer.offsetLeft,
+        cropRect.x,
         cropRect.y,
         // page.getHeight() - cropRect.y - cropRect.height,
         cropRect.width,
@@ -353,18 +353,41 @@ document.getElementById('start-crop').addEventListener('click', function () {
 document.getElementById('confirm-crop').addEventListener('click', async () => {
     const cropOverlay = document.getElementById('crop-overlay');
     const cropRect = cropOverlay.getBoundingClientRect();
-    const currentPage = getCurrentPageinView();
-    // Get the zoom level of the 
+    const currentPageNumber = getCurrentPageinView() - 1;
+    const pdfPage = pdfDoc.getPage(currentPageNumber);
+    const { x, y, width, height } = pdfPage.getMediaBox();
+    const pageElement = document.getElementById(`page-${currentPageNumber + 1}`);
+    const pdfContainer = document.getElementById('pdf-viewer-container');
 
-    // Calculate the bottom left corner of the crop rectangle
-    // const bottomLeft = {
-    //     x: rect.left + window.scrollX - document.getElementById('pdf-viewer-container').offsetLeft,
-    //     y: rect.top + window.scrollY - document.getElementById('pdf-viewer-container').offsetTop + rect.height
-    // };
+    const offsetX = pdfContainer.offsetLeft;
+    const offsetY = pdfContainer.offsetTop;
 
-    // const pdfBytes = await cropPage(currentPage - 1, cropRect, pdfDoc);
+    const pdfRenderedWidth = pageElement.width;
+    const pdfRenderedHeight = pageElement.height;
 
-    // renderPDF(pdfBytes);
+    const pdfActualWidth = width;
+    const pdfActualHeight = height;
+
+    const scaleX = pdfRenderedWidth / pdfActualWidth;
+    const scaleY = pdfRenderedHeight / pdfActualHeight;
+
+    // Translate HTML coordinates to PDF coordinates
+    // Adjust for any offsets if your PDF is not rendered at the top-left corner of `pdf-container`
+    let pdfX = (cropRect.left - offsetX) / scaleX;
+    let pdfY = (cropRect.top - offsetY) / scaleY;
+
+    // Convert y-coordinate from top-left to bottom-left origin
+    pdfY = pdfActualHeight - pdfY - (cropRect.height / scaleY);
+
+    // Width and height scale
+    let pdfWidth = cropRect.width / scaleX;
+    let pdfHeight = cropRect.height / scaleY;
+
+    const adjustedCropRect = { x: pdfX, y: pdfY, width: pdfWidth, height: pdfHeight };
+
+    const pdfBytes = await cropPage(currentPageNumber, adjustedCropRect, pdfDoc);
+
+    renderPDF(pdfBytes);
 
     document.getElementById('crop-overlay').style.display = 'none';
 });
