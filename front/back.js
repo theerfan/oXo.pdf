@@ -434,7 +434,7 @@ let resizing = false;
 let resizeDirection = '';
 
 // Function to update the overlay's size
-function resizeOverlay(mouseX) {
+function resizeOverlay(mouseX, mouseY) {
     const cropOverlay = document.getElementById('crop-overlay');
     // const rect = cropOverlay.getBoundingClientRect();
 
@@ -456,14 +456,14 @@ function resizeOverlay(mouseX) {
     else if (resizeDirection === 'top') {
         const oldHeight = parseInt(cropOverlay.style.height.replace('px', ''));
         const oldTop = parseInt(cropOverlay.style.top.replace('px', ''));
-        const newHeight = oldHeight + (oldTop - mouseX);
+        const newHeight = oldHeight + (oldTop - mouseY);
         if (newHeight > 0) {
             cropOverlay.style.height = newHeight + 'px';
-            cropOverlay.style.top = mouseX + 'px';
+            cropOverlay.style.top = mouseY + 'px';
         }
     }
     else if (resizeDirection === 'bottom') {
-        const newHeight = mouseX - parseInt(cropOverlay.style.top.replace('px', ''));
+        const newHeight = mouseY - parseInt(cropOverlay.style.top.replace('px', ''));
         if (newHeight > 0) {
             cropOverlay.style.height = newHeight + 'px';
         }
@@ -488,7 +488,7 @@ document.getElementById('bottom-handle').addEventListener('mousedown', handleMou
 // Mouse move event to handle resizing
 document.addEventListener('mousemove', function (e) {
     if (resizing) {
-        resizeOverlay(e.clientX);
+        resizeOverlay(e.clientX, e.clientY);
     }
 });
 
