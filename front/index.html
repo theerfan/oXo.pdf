@@ -21,6 +21,7 @@
             <div class="tab-links tab-delete" onclick="openTab('delete')">Delete Page</div>
             <div class="tab-links tab-insert" onclick="openTab('insert')">Insert Page</div>
             <div class="tab-links tab-rotate" onclick="openTab('rotate')">Rotate Page</div>
+            <div class="tab-links tab-download" onclick="openTab('download')">Download PDF</div>
         </div>  
     </div>
 
@@ -97,15 +98,25 @@
         </div>
     </div>
 
+    <div id="download" class="tab-content">
+        <div id="download-container">
+            <h3>Download the PDF</h3>
+            <button id="download-page">Download Page</button>
+        </div>
+    </div>
+
     <!-- The rest of your content goes here -->
     <div id="pdf-container"></div>
+
+    <!-- Include the main script file -->
+    <script src="back.js"></script>
+    <script src="front.js"></script>
 
     <!-- Include pdf.js library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.6.347/pdf.min.js"></script>
     <script> pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.6.347/pdf.worker.min.js'; </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
-    <script src="back.js"></script>
-    <script src="front.js"></script>
+
     <!-- To initialize -->
     <script>
         openTab('load');

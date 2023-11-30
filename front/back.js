@@ -1,5 +1,7 @@
 // Global variables
+// This one is the proxy for showing and pdf.js
 let pdfDoc = null;
+// This one contains the actual bytes of the PDF file, using pdf-lib
 let pdfFile = null;
 
 // Render the PDF file using pdf.js
@@ -71,7 +73,8 @@ document.getElementById('file-input').addEventListener('change', async (event) =
 
 // Deletes the page specified by the user
 document.getElementById('delete-page').addEventListener('click', async () => {
-    const pageNumber = parseInt(document.getElementById('page-number').value);
+    const pageNumber = parseInt(document.getElementById('delete-page-number').value);
+    // const pageNumber = getCurrentPageinView();
     if (pageNumber > 0 && pageNumber <= pdfDoc.getPageCount()) {
         pdfDoc.removePage(pageNumber - 1);
         const pdfBytes = await pdfDoc.save();
@@ -79,13 +82,6 @@ document.getElementById('delete-page').addEventListener('click', async () => {
         // Render the new PDF
         renderPDF(pdfBytes);
 
-        const blob = new Blob([pdfBytes], { type: 'application/pdf' });
-        const url = URL.createObjectURL(blob);
-        const downloadLink = document.getElementById('download-link');
-        downloadLink.href = url;
-        downloadLink.download = 'modified_document.pdf';
-        downloadLink.style.display = 'block';
-        downloadLink.textContent = 'Download Modified PDF';
     } else {
         alert('Invalid page number');
     }
@@ -101,15 +97,6 @@ document.getElementById('insert-blank-page').addEventListener('click', async () 
 
         // render the new PDF
         renderPDF(pdfBytes);
-
-        // Update download link
-        const blob = new Blob([pdfBytes], { type: 'application/pdf' });
-        const url = URL.createObjectURL(blob);
-        const downloadLink = document.getElementById('download-link');
-        downloadLink.href = url;
-        downloadLink.download = 'modified_document.pdf';
-        downloadLink.style.display = 'block';
-        downloadLink.textContent = 'Download Modified PDF';
     } else {
         alert('Invalid page number for insertion');
     }
@@ -128,15 +115,6 @@ document.getElementById('rotate-page').addEventListener('click', async () => {
 
         const pdfBytes = await pdfDoc.save();
         renderPDF(pdfBytes);
-
-        // Update download link
-        const blob = new Blob([pdfBytes], { type: 'application/pdf' });
-        const url = URL.createObjectURL(blob);
-        const downloadLink = document.getElementById('download-link');
-        downloadLink.href = url;
-        downloadLink.download = 'modified_document.pdf';
-        downloadLink.style.display = 'block';
-        downloadLink.textContent = 'Download Modified PDF';
     } else {
         alert('Invalid page number for rotation');
     }
@@ -239,12 +217,6 @@ document.getElementById('crop-page').addEventListener('click', async () => {
             const croppedPdfBytes = await cropPage(pageNumber, { x, y, width, height }, pdfDoc);
             // Render the cropped PDF
             renderPDF(croppedPdfBytes);
-            // Add a download link for the cropped PDF
-            const blob = new Blob([croppedPdfBytes], { type: 'application/pdf' });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = 'cropped_document.pdf';
-            // link.click();
         } catch (error) {
             console.error('Error cropping page:', error);
         }
@@ -304,13 +276,9 @@ document.getElementById('merge-pdfs').addEventListener('click', async () => {
         // Call the mergeMultiplePdfs function
         try {
             const mergedPdfBytes = await mergeMultiplePdfs(pdfBytesArray);
-
-            // Create a Blob from the bytes and trigger a download
-            const blob = new Blob([mergedPdfBytes], { type: 'application/pdf' });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = 'merged_document.pdf';
-            // link.click();
+            pdfDoc = await PDFLib.PDFDocument.load(mergedPdfBytes);
+            // Render the merged PDF
+            renderPDF(mergedPdfBytes);
         } catch (error) {
             console.error('Error merging PDFs:', error);
         }
@@ -342,20 +310,32 @@ document.getElementById('extract-page').addEventListener('click', async () => {
         // Convert canvas to an image
         const img = document.getElementById('extracted-page-img');
         img.src = canvas.toDataURL('image/png');
-        // img.style.display = 'block';
+        img.style.display = 'block';
 
-        // Optionally, download the image
-        const link = document.createElement('a');
-        link.textContent = 'Download Extracted Page';
-        link.href = img.src;
-        link.download = 'extracted_page.png';
-        // Add the link to the DOM
-        const download_element = document.getElementById('download-link');
-        download_element.innerHTML = '';
-        download_element.appendChild(link);
-        download_element.style.display = 'block';
-        // link.click();
     } catch (error) {
         console.error('Error extracting page:', error);
     }
+});
+
+
+// function showDownloadOption(link) {
+//     // Add the link to the DOM
+//     const download_element = document.getElementById('download-link');
+//     download_element.innerHTML = '';
+//     download_element.appendChild(link);
+//     download_element.style.display = 'block';
+// }
+
+document.getElementById('download-page').addEventListener('click', async () => {
+    // Get the bytes of the PDF document
+    if (!pdfDoc) {
+        alert('Please load a PDF file.');
+        return;
+    }
+    const pdfBytes = await pdfDoc.save();
+    const link = document.createElement('a');
+    link.textContent = 'Download PDF';
+    link.href = URL.createObjectURL(new Blob([pdfBytes], { type: 'application/pdf' }));
+    link.download = 'document.pdf';
+    link.click();
 });
