@@ -414,20 +414,25 @@ window.addEventListener('scroll', function () {
     setCropOverlayPosition();
 });
 
+let previousPageforOverlay = 0;
+
 function setCropOverlayPosition() {
     const cropOverlay = document.getElementById('crop-overlay');
     const pdfContainer = document.getElementById('pdf-container');
     const pdfViewerContainer = document.getElementById('pdf-viewer-container');
     // Change the crop area to match the current page size of the PDF container
     const currentPage = getCurrentPageinView();
-    // Get the element for the current page
-    const page = document.getElementById(`page-${currentPage}`);
-    const rect = page.getBoundingClientRect();
-    cropOverlay.style.width = rect.width + 'px';
-    cropOverlay.style.height = rect.height + 'px';
-    cropOverlay.style.left = (rect.left + window.scrollX - pdfViewerContainer.offsetLeft) + 'px';
-    cropOverlay.style.top = (rect.top + window.scrollY - pdfViewerContainer.offsetTop) + 'px';
-    cropOverlay.style.display = 'block';
+    if (previousPageforOverlay != currentPage) {
+        // Get the element for the current page
+        const page = document.getElementById(`page-${currentPage}`);
+        const rect = page.getBoundingClientRect();
+        cropOverlay.style.width = rect.width + 'px';
+        cropOverlay.style.height = rect.height + 'px';
+        cropOverlay.style.left = (rect.left + window.scrollX - pdfViewerContainer.offsetLeft) + 'px';
+        cropOverlay.style.top = (rect.top + window.scrollY - pdfViewerContainer.offsetTop) + 'px';
+        cropOverlay.style.display = 'block';
+        previousPageforOverlay = currentPage;
+    }
 }
 
 let resizing = false;
@@ -436,6 +441,7 @@ let resizeDirection = '';
 // Function to update the overlay's size
 function resizeOverlay(mouseX, mouseY) {
     const cropOverlay = document.getElementById('crop-overlay');
+    const scrollY = window.scrollY;
     // const rect = cropOverlay.getBoundingClientRect();
 
     if (resizeDirection === 'left') {
@@ -456,14 +462,14 @@ function resizeOverlay(mouseX, mouseY) {
     else if (resizeDirection === 'top') {
         const oldHeight = parseInt(cropOverlay.style.height.replace('px', ''));
         const oldTop = parseInt(cropOverlay.style.top.replace('px', ''));
-        const newHeight = oldHeight + (oldTop - mouseY);
+        const newHeight = oldHeight + (oldTop - (mouseY + scrollY));
         if (newHeight > 0) {
             cropOverlay.style.height = newHeight + 'px';
-            cropOverlay.style.top = mouseY + 'px';
+            cropOverlay.style.top = (mouseY + scrollY) + 'px';
         }
     }
     else if (resizeDirection === 'bottom') {
-        const newHeight = mouseY - parseInt(cropOverlay.style.top.replace('px', ''));
+        const newHeight = (mouseY + scrollY) - parseInt(cropOverlay.style.top.replace('px', ''));
         if (newHeight > 0) {
             cropOverlay.style.height = newHeight + 'px';
         }
