@@ -189,13 +189,18 @@ function renderBookmarks(bookmarks, container, pdfDoc, level = 0) {
 async function cropPage(pageToCrop, cropRect, pdfDoc) {
     // Get the page
     const page = pdfDoc.getPages()[pageToCrop];
+    const prevCropbox = page.getCropBox();
+    const pdfContainer = document.getElementById('pdf-viewer-container');
 
     // Calculate the new crop box
+    // (lower left corner of the page is the origin)
     const cropBox = [
-        cropRect.x,
-        page.getHeight() - cropRect.y - cropRect.height,
-        cropRect.x + cropRect.width,
-        page.getHeight() - cropRect.y
+        cropRect.x - pdfContainer.offsetLeft,
+        cropRect.y,
+        // page.getHeight() - cropRect.y - cropRect.height,
+        cropRect.width,
+        cropRect.height
+        // page.getHeight() - cropRect.y
     ];
 
     // Set the crop box
@@ -347,17 +352,19 @@ document.getElementById('start-crop').addEventListener('click', function () {
 // Confirm crop button logic
 document.getElementById('confirm-crop').addEventListener('click', async () => {
     const cropOverlay = document.getElementById('crop-overlay');
-    const rect = cropOverlay.getBoundingClientRect();
+    const cropRect = cropOverlay.getBoundingClientRect();
     const currentPage = getCurrentPageinView();
+    // Get the zoom level of the 
 
-    const pdfBytes = await cropPage(currentPage - 1, {
-        x: rect.left,
-        y: rect.top,
-        width: rect.width,
-        height: rect.height
-    }, pdfDoc);
+    // Calculate the bottom left corner of the crop rectangle
+    // const bottomLeft = {
+    //     x: rect.left + window.scrollX - document.getElementById('pdf-viewer-container').offsetLeft,
+    //     y: rect.top + window.scrollY - document.getElementById('pdf-viewer-container').offsetTop + rect.height
+    // };
 
-    renderPDF(pdfBytes);
+    // const pdfBytes = await cropPage(currentPage - 1, cropRect, pdfDoc);
+
+    // renderPDF(pdfBytes);
 
     document.getElementById('crop-overlay').style.display = 'none';
 });
