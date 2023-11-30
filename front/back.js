@@ -348,20 +348,7 @@ document.getElementById('download-page').addEventListener('click', async () => {
 // Visual cropping stuff
 
 document.getElementById('start-crop').addEventListener('click', function () {
-    const cropOverlay = document.getElementById('crop-overlay');
-    cropOverlay.draggable = true;
-    const pdfContainer = document.getElementById('pdf-container');
-    const pdfViewerContainer = document.getElementById('pdf-viewer-container');
-    // Change the crop area to match the current page size of the PDF container
-    const currentPage = getCurrentPageinView();
-    // Get the element for the current page
-    const page = document.getElementById(`page-${currentPage}`);
-    const rect = page.getBoundingClientRect();
-    cropOverlay.style.width = rect.width + 'px';
-    cropOverlay.style.height = rect.height + 'px';
-    cropOverlay.style.left = (rect.left + window.scrollX - pdfViewerContainer.offsetLeft) + 'px';
-    cropOverlay.style.top = (rect.top + window.scrollY - pdfViewerContainer.offsetTop) + 'px';
-    cropOverlay.style.display = 'block';
+    setCropOverlayPosition();
 
     // Additional logic to initialize cropping...
 });
@@ -418,3 +405,27 @@ document.getElementById('confirm-crop').addEventListener('click', function () {
 
 // Make shit draggable
 
+// Adjust the position of the crop-overlay when window is resized (zoom changes)
+window.addEventListener('resize', function () {
+    setCropOverlayPosition();
+});
+
+window.addEventListener('scroll', function () {
+    setCropOverlayPosition();
+});
+
+function setCropOverlayPosition() {
+    const cropOverlay = document.getElementById('crop-overlay');
+    const pdfContainer = document.getElementById('pdf-container');
+    const pdfViewerContainer = document.getElementById('pdf-viewer-container');
+    // Change the crop area to match the current page size of the PDF container
+    const currentPage = getCurrentPageinView();
+    // Get the element for the current page
+    const page = document.getElementById(`page-${currentPage}`);
+    const rect = page.getBoundingClientRect();
+    cropOverlay.style.width = rect.width + 'px';
+    cropOverlay.style.height = rect.height + 'px';
+    cropOverlay.style.left = (rect.left + window.scrollX - pdfViewerContainer.offsetLeft) + 'px';
+    cropOverlay.style.top = (rect.top + window.scrollY - pdfViewerContainer.offsetTop) + 'px';
+    cropOverlay.style.display = 'block';
+}
