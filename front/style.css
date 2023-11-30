@@ -121,17 +121,12 @@ body {
     /* Semi-transparent overlay */
 }
 
-#crop-area {
-    border: 2px solid white;
-    /* Visible cropping area */
-    position: absolute;
+#confirm-crop {
+    /* position: absolute; */
+    /* bottom: 10px; */
+    /* right: 10px; */
+    z-index: 1000;
 }
-
-/* #confirm-crop {
-    position: absolute;
-    bottom: 10px;
-    right: 10px;
-} */
 
 #pdf-container {
     position: relative;

@@ -322,14 +322,6 @@ document.getElementById('extract-page').addEventListener('click', async () => {
 });
 
 
-// function showDownloadOption(link) {
-//     // Add the link to the DOM
-//     const download_element = document.getElementById('download-link');
-//     download_element.innerHTML = '';
-//     download_element.appendChild(link);
-//     download_element.style.display = 'block';
-// }
-
 document.getElementById('download-page').addEventListener('click', async () => {
     // Get the bytes of the PDF document
     if (!pdfDoc) {
@@ -349,56 +341,23 @@ document.getElementById('download-page').addEventListener('click', async () => {
 
 document.getElementById('start-crop').addEventListener('click', function () {
     setCropOverlayPosition();
-
-    // Additional logic to initialize cropping...
 });
 
-// Variables to store   initial positions
-let startX, startY, isResizing = false;
-
-const cropArea = document.getElementById('crop-area');
-
-// Mouse down event on the overlay to start cropping
-document.getElementById('crop-overlay').addEventListener('mousedown', function (e) {
-    startX = e.clientX;
-    startY = e.clientY;
-    isResizing = true;
-
-    cropArea.style.width = '0px';
-    cropArea.style.height = '0px';
-    cropArea.style.left = startX + 'px';
-    cropArea.style.top = startY + 'px';
-});
-
-// Mouse move event to adjust the crop area
-document.addEventListener('mousemove', function (e) {
-    if (!isResizing) return;
-    const width = e.clientX - startX;
-    const height = e.clientY - startY;
-
-    cropArea.style.width = Math.abs(width) + 'px';
-    cropArea.style.height = Math.abs(height) + 'px';
-
-    if (width < 0) {
-        cropArea.style.left = e.clientX + 'px';
-    }
-
-    if (height < 0) {
-        cropArea.style.top = e.clientY + 'px';
-    }
-});
-
-// Mouse up event to stop resizing
-document.addEventListener('mouseup', function () {
-    isResizing = false;
-});
 
 // Confirm crop button logic
-document.getElementById('confirm-crop').addEventListener('click', function () {
-    const rect = cropArea.getBoundingClientRect();
+document.getElementById('confirm-crop').addEventListener('click', async () => {
+    const cropOverlay = document.getElementById('crop-overlay');
+    const rect = cropOverlay.getBoundingClientRect();
+    const currentPage = getCurrentPageinView();
 
-    // Logic to crop the PDF based on rect coordinates
-    // ...
+    const pdfBytes = await cropPage(currentPage - 1, {
+        x: rect.left,
+        y: rect.top,
+        width: rect.width,
+        height: rect.height
+    }, pdfDoc);
+
+    renderPDF(pdfBytes);
 
     document.getElementById('crop-overlay').style.display = 'none';
 });
