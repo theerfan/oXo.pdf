@@ -127,7 +127,6 @@ document.getElementById('rotate-page').addEventListener('click', async () => {
 
 // Function to get the current page in view
 function getCurrentPageinView() {
-    console.log("here");
     const container = document.getElementById('pdf-container');
     const children = container.children;
     let maxVisibleHeight = 0;
@@ -344,3 +343,78 @@ document.getElementById('download-page').addEventListener('click', async () => {
     link.download = 'document.pdf';
     link.click();
 });
+
+
+// Visual cropping stuff
+
+document.getElementById('start-crop').addEventListener('click', function () {
+    const cropOverlay = document.getElementById('crop-overlay');
+    cropOverlay.draggable = true;
+    const pdfContainer = document.getElementById('pdf-container');
+    const pdfViewerContainer = document.getElementById('pdf-viewer-container');
+    // Change the crop area to match the current page size of the PDF container
+    const currentPage = getCurrentPageinView();
+    // Get the element for the current page
+    const page = document.getElementById(`page-${currentPage}`);
+    const rect = page.getBoundingClientRect();
+    cropOverlay.style.width = rect.width + 'px';
+    cropOverlay.style.height = rect.height + 'px';
+    cropOverlay.style.left = (rect.left + window.scrollX - pdfViewerContainer.offsetLeft) + 'px';
+    cropOverlay.style.top = (rect.top + window.scrollY - pdfViewerContainer.offsetTop) + 'px';
+    cropOverlay.style.display = 'block';
+
+    // Additional logic to initialize cropping...
+});
+
+// Variables to store   initial positions
+let startX, startY, isResizing = false;
+
+const cropArea = document.getElementById('crop-area');
+
+// Mouse down event on the overlay to start cropping
+document.getElementById('crop-overlay').addEventListener('mousedown', function (e) {
+    startX = e.clientX;
+    startY = e.clientY;
+    isResizing = true;
+
+    cropArea.style.width = '0px';
+    cropArea.style.height = '0px';
+    cropArea.style.left = startX + 'px';
+    cropArea.style.top = startY + 'px';
+});
+
+// Mouse move event to adjust the crop area
+document.addEventListener('mousemove', function (e) {
+    if (!isResizing) return;
+    const width = e.clientX - startX;
+    const height = e.clientY - startY;
+
+    cropArea.style.width = Math.abs(width) + 'px';
+    cropArea.style.height = Math.abs(height) + 'px';
+
+    if (width < 0) {
+        cropArea.style.left = e.clientX + 'px';
+    }
+
+    if (height < 0) {
+        cropArea.style.top = e.clientY + 'px';
+    }
+});
+
+// Mouse up event to stop resizing
+document.addEventListener('mouseup', function () {
+    isResizing = false;
+});
+
+// Confirm crop button logic
+document.getElementById('confirm-crop').addEventListener('click', function () {
+    const rect = cropArea.getBoundingClientRect();
+
+    // Logic to crop the PDF based on rect coordinates
+    // ...
+
+    document.getElementById('crop-overlay').style.display = 'none';
+});
+
+// Make shit draggable
+

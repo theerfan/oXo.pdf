@@ -54,7 +54,8 @@ body {
 
 /* Container for tab links */
 .tab {
-    display: flex; /* Aligns children in a row */
+    display: flex;
+    /* Aligns children in a row */
     overflow: hidden;
     background-color: #f1f1f1;
     border-bottom: 1px solid #ccc;
@@ -65,14 +66,16 @@ body {
     flex-grow: 1;
     text-align: center;
     border: 1px solid #ccc;
-    border-bottom: none; /* Remove bottom border to merge with the content box */
+    border-bottom: none;
+    /* Remove bottom border to merge with the content box */
     outline: none;
     cursor: pointer;
     padding: 10px 16px;
     transition: 0.3s;
     font-size: 17px;
     background-color: inherit;
-    margin-right: 2px; /* Creates a small gap between tabs */
+    margin-right: 2px;
+    /* Creates a small gap between tabs */
 }
 
 /* Last tab link should not have a margin on the right */
@@ -88,7 +91,8 @@ body {
 /* Create an active/current tablink class */
 .tab .tab-links.active {
     background-color: #ccc;
-    border-bottom: 1px solid white; /* To blend with the content box */
+    border-bottom: 1px solid white;
+    /* To blend with the content box */
 }
 
 /* Style the tab content */
@@ -96,4 +100,46 @@ body {
     display: none;
     padding: 6px 12px;
     border: 1px solid #ccc;
+}
+
+/* new stuff for visual cropping */
+
+#pdf-viewer-container {
+    position: relative;
+}
+
+#crop-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    /* Semi-transparent overlay */
+}
+
+#crop-area {
+    border: 2px solid white;
+    /* Visible cropping area */
+    position: absolute;
+}
+
+#confirm-crop {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+}
+
+#pdf-container {
+    position: relative;
+    /* other styles */
+}
+
+* {
+    box-sizing: border-box;
+}
+
+#page-container {
+    position: relative;
+    /* other styles */
 }

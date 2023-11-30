@@ -7,10 +7,6 @@
 </head>
 
 <body>
-    <!-- Place to show PDF download url -->
-    <a id="download-link" style="display:none;">Download Modified PDF</a>
-    <br />
-
     <div id="toolbar">
         <!-- Tab buttons -->
         <div class="tab">
@@ -22,7 +18,7 @@
             <div class="tab-links tab-insert" onclick="openTab('insert')">Insert Page</div>
             <div class="tab-links tab-rotate" onclick="openTab('rotate')">Rotate Page</div>
             <div class="tab-links tab-download" onclick="openTab('download')">Download PDF</div>
-        </div>  
+        </div>
     </div>
 
     <div id="bookmarks-container" style="display: none;"></div>
@@ -68,10 +64,10 @@
             <input type="number" id="crop-width" placeholder="Width" min="0" />
             <input type="number" id="crop-height" placeholder="Height" min="0" />
             <button id="crop-page">Crop Page</button>
+            <button id="start-crop">Visual Crop</button>
+            <button id="confirm-crop">Confirm Crop</button>
         </div>
     </div>
-
-    <br />
 
     <div id="merge" class="tab-content">
         <div id="merge-container">
@@ -106,7 +102,17 @@
     </div>
 
     <!-- The rest of your content goes here -->
-    <div id="pdf-container"></div>
+    <div id="pdf-viewer-container">
+        <!-- Canvas where PDF page is rendered -->
+        <div id="pdf-container"></div>
+        <div id="crop-overlay" style="display: none;">
+            <!-- Cropping area -->
+            <div id="crop-area" style="display: none;"></div>
+            <!-- Button to confirm the crop -->
+            <button id="confirm-crop">Crop</button>
+        </div>
+    </div>
+
 
     <!-- Include the main script file -->
     <script src="back.js"></script>
