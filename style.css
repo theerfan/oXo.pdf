@@ -13,6 +13,8 @@
 body {
     padding-top: 70px;
     /* Add padding to prevent content from hiding behind the toolbar */
+    display: flex;
+    flex-direction: column;
 }
 
 /* #crop-container {
@@ -95,20 +97,100 @@ body {
     /* To blend with the content box */
 }
 
+
+/* Create an active/current tablink class */
+.active {
+    background-color: #ccc;
+    border-bottom: 1px solid white;
+    /* To blend with the content box */
+}
+
 /* Style the tab content */
 .tab-content {
     display: none;
-    position: fixed;
-    z-index: 1000;
+    /* position: fixed; */
+    /* z-index: 1000; */
     padding: 6px 12px;
     border: 1px solid #ccc;
     background-color: white;
+    grid-row: 1;
+}
+
+#content-container {
+    display: flex;
+    flex-direction: row;
+}
+
+#bookmarks-super-container {
+    position: sticky;
+    top: 100px;
+    /* Adjust this value based on your layout */
+    left: 10px;
+    /* Adjust this value to position the container */
+    max-height: calc(100vh - 120px);
+    /* vh unit ensures it takes viewport height into account */
+    overflow-y: visible;
+    /* Adds a scrollbar when content overflows */
+    /* Adjust width as needed */
+    display: flex;
+    flex-direction: column;
+    /* Make sure it's visible */
+    z-index: 10;
+    /* Ensure it's above other content */
+    max-width: 80vw; /* 20% of the viewport width */
+    min-width: 100px;
+    width: 20vw;
+}
+
+#resize-grip {
+    width: 10px; /* Width of the grip area */
+    height: 100%;
+    background-color: #ccc; /* Just for visibility, style as needed */
+    cursor: ew-resize; /* Cursor indicates the element is resizable */
+    position: absolute;
+    right: 0;
+    top: 0;
+}
+
+#bookmarks-container {
+    margin-top: 1px;
+    max-height: calc(100vh - 170px);
+    margin-left: 5%;
+    overflow: auto;
+}
+
+/* Style the tab links */
+#toggle-button {
+    text-align: center;
+    border: 1px solid #ccc;
+    border-bottom: none;
+    padding: 10px 16px;
+    transition: 0.3s;
+    background-color: inherit;
+    margin-right: 2px;
+    position: sticky;
+    top: 0;
+    padding-bottom: 5%;
+    border-bottom: 1px solid #ccc;
+}
+
+#toggle-button.hidden-bookmarks {
+    padding: 5px 16px; /* Reduced padding */
+    font-size: 0.8em; /* Smaller font size */
+    /* Add other style changes as necessary */
+}
+
+/* Change background color of tab links on hover */
+#toggle-button:hover {
+    background-color: #ddd;
 }
 
 /* new stuff for visual cropping */
 
 #pdf-viewer-container {
     position: relative;
+    grid-row: 2;
+    flex-grow: 1;
 }
 
 #crop-overlay {
@@ -147,8 +229,10 @@ body {
     position: absolute;
     width: 10px;
     height: 100%;
-    cursor: ew-resize; /* Horizontal resize cursor */
-    background-color: rgba(255,255,255,0.5); /* Just to make it visible */
+    cursor: ew-resize;
+    /* Horizontal resize cursor */
+    background-color: rgba(255, 255, 255, 0.5);
+    /* Just to make it visible */
 }
 
 #left-handle {
@@ -166,8 +250,10 @@ body {
     left: 0;
     width: 100%;
     height: 10px;
-    cursor: ns-resize; /* Vertical resize cursor */
-    background-color: rgba(255,255,255,0.5); /* Just to make it visible */
+    cursor: ns-resize;
+    /* Vertical resize cursor */
+    background-color: rgba(255, 255, 255, 0.5);
+    /* Just to make it visible */
 }
 
 #bottom-handle {
@@ -175,8 +261,10 @@ body {
     left: 0;
     width: 100%;
     height: 10px;
-    cursor: ns-resize; /* Vertical resize cursor */
-    background-color: rgba(255,255,255,0.5); /* Just to make it visible */
+    cursor: ns-resize;
+    /* Vertical resize cursor */
+    background-color: rgba(255, 255, 255, 0.5);
+    /* Just to make it visible */
 }
 
 /* Add styles for other handles (right, top, bottom, etc.) */

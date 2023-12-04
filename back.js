@@ -51,7 +51,9 @@ async function renderPDF(pdfBytes) {
 
         pdf.getOutline().then(outline => {
             const bookmarksContainer = document.getElementById('bookmarks-container');
+            // const toggleButton = document.getElementById('toggle-button');
             bookmarksContainer.innerHTML = ''; // Clear previous bookmarks
+            // bookmarksContainer.appendChild(toggleButton); // Add the toggle button back
             renderBookmarks(outline, bookmarksContainer, pdf);
         });
     });
@@ -179,6 +181,10 @@ function renderBookmarks(bookmarks, container, pdfDoc, level = 0) {
             renderBookmarks(bookmark.items, container, pdfDoc, level + 1);
         }
     });
+
+    container.style.display = 'block';
+    // Call this function when showing the bookmarks-container or updating its content
+    resetBookmarkScroll();
 }
 
 // Function to crop a page in a PDF
@@ -493,3 +499,55 @@ function getTotalOffset(element) {
     }
     return { x: totalOffsetX, y: totalOffsetY };
 }
+
+function resetBookmarkScroll() {
+    const bookmarksContainer = document.getElementById('bookmarks-container');
+    bookmarksContainer.scrollTop = 0; // Resets the scroll position to the top
+}
+
+
+document.getElementById('toggle-button').addEventListener('click', function () {
+    var toggleButton = document.getElementById('toggle-button');
+
+    var bookmarksContainer = document.getElementById('bookmarks-container');
+    var isVisible = bookmarksContainer.style.display !== 'none';
+
+    if (isVisible) {
+        bookmarksContainer.style.display = 'none';
+        toggleButton.classList.add('hidden-bookmarks');
+    } else {
+        bookmarksContainer.style.display = 'block'; // Or 'flex', 'grid' etc. depending on your layout
+        toggleButton.classList.remove('hidden-bookmarks');
+    }
+});
+
+window.onload = function () {
+    var bookmarksContainer = document.getElementById('bookmarks-container');
+    var toggleButton = document.getElementById('toggle-button');
+
+    // Initially hide bookmarks
+    bookmarksContainer.style.display = 'none';
+    toggleButton.classList.add('hidden-bookmarks');
+}
+
+
+let isBookmarksResizing = false;
+
+const bookmarksContainer = document.getElementById('bookmarks-super-container');
+const resizeGrip = document.getElementById('resize-grip');
+
+resizeGrip.addEventListener('mousedown', function(e) {
+    e.preventDefault();
+    isBookmarksResizing = true;
+});
+
+document.addEventListener('mousemove', function(e) {
+    if (isBookmarksResizing) {
+        let newWidth = e.clientX - bookmarksContainer.getBoundingClientRect().left;
+        bookmarksContainer.style.width = newWidth + 'px';
+    }
+});
+
+document.addEventListener('mouseup', function(e) {
+    isBookmarksResizing = false;
+});
