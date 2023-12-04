@@ -365,6 +365,9 @@ document.getElementById('confirm-crop').addEventListener('click', async () => {
 
     renderPDF(pdfBytes);
 
+    // Scroll back down to the current page element
+    currentPageElement.scrollIntoView({ behavior: 'smooth' });
+
     document.getElementById('crop-overlay').style.display = 'none';
 
     cropMode = false;

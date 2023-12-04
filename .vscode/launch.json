@@ -9,7 +9,7 @@
             "type": "firefox",
             "request": "launch",
             "reAttach": true,
-            "file": "${workspaceFolder}/front/index.html",
+            "file": "${workspaceFolder}/index.html",
             "port": 6000
         },
         {
