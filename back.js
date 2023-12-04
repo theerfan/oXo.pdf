@@ -25,6 +25,8 @@ async function renderPDF(pdfBytes) {
             pageNumberElement.innerText = `Page ${pageNum}`;
             pageContainer.appendChild(pageNumberElement);
 
+            // renderPage(pageNum);
+
             pdf.getPage(pageNum).then(page => {
                 const scale = 1.5;
                 const viewport = page.getViewport({ scale: scale });
@@ -33,6 +35,7 @@ async function renderPDF(pdfBytes) {
                 canvas.id = `page-${pageNum}`;
                 canvas.height = viewport.height;
                 canvas.width = viewport.width;
+
 
                 // Center canvas
                 canvas.style.marginLeft = 'auto';
@@ -58,6 +61,56 @@ async function renderPDF(pdfBytes) {
         });
     });
 }
+
+// Assuming you have a PDF file loaded as `pdfFile`
+
+async function renderPage(pageNumber) {
+    pdfFile.getPage(pageNumber).then(page => {
+        // Prepare canvas for PDF page
+        var viewport = page.getViewport({ scale: 1.0 });
+        var canvas = document.createElement('canvas');
+        var ctx = canvas.getContext('2d');
+        canvas.height = viewport.height;
+        canvas.width = viewport.width;
+
+        // Render the page into the canvas
+        var renderContext = {
+            canvasContext: ctx,
+            viewport: viewport
+        };
+        var renderTask = page.render(renderContext);
+
+        // Append the canvas to your page container
+        var container = document.createElement('div');
+        container.style.position = 'relative';
+        container.appendChild(canvas);
+        document.getElementById('pdf-container').appendChild(container);
+
+        // Render text layer
+        renderTask.promise.then(() => {
+            return page.getTextContent();
+        }).then(textContent => {
+            // Create a new div for the text layer
+            var textLayerDiv = document.createElement('div');
+            textLayerDiv.className = 'textLayer';
+            textLayerDiv.style.position = 'absolute';
+            textLayerDiv.style.top = 0;
+            textLayerDiv.style.left = 0;
+            textLayerDiv.style.height = `${viewport.height}px`;
+            textLayerDiv.style.width = `${viewport.width}px`;
+            container.appendChild(textLayerDiv);
+
+            // Render the text items in the text layer div
+            pdfjsLib.renderTextLayer({
+                textContent: textContent,
+                container: textLayerDiv,
+                viewport: viewport,
+                textDivs: []
+            });
+        });
+    });
+}
+
 
 // Gets the PDF file from the input element and renders it to the page
 document.getElementById('file-input').addEventListener('change', async (event) => {

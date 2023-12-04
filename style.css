@@ -270,3 +270,10 @@ body {
 }
 
 /* Add styles for other handles (right, top, bottom, etc.) */
+
+.textLayer {
+    color: transparent;
+    white-space: pre;
+    font-family: sans-serif;
+    overflow: hidden;
+}
