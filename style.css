@@ -165,7 +165,6 @@ body {
     border: 1px solid #ccc;
     border-bottom: none;
     padding: 10px 16px;
-    transition: 0.3s;
     background-color: inherit;
     margin-right: 2px;
     position: sticky;
@@ -177,6 +176,9 @@ body {
 #toggle-button.hidden-bookmarks {
     padding: 5px 16px; /* Reduced padding */
     font-size: 0.8em; /* Smaller font size */
+    width: inherit;
+    min-width: inherit;
+    max-width: 100%;
     /* Add other style changes as necessary */
 }
 
