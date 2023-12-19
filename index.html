@@ -21,82 +21,86 @@
         </div>
     </div>
 
-    <div id="load" class="tab-content">
-        <div id="load-container">
-            <h3>Load PDF</h3>
-            <input type="file" id="file-input" accept="application/pdf" />
-        </div>
-    </div>
+    <div id="tab-containers">
 
-    <div id="delete" class="tab-content">
-        <div id="delete-container">
-            <h3>Delete PDF Page</h3>
-            <input type="number" id="delete-page-number" placeholder="Page number" min="1" />
-            <button id="delete-page">Delete Page</button>
-        </div>
-    </div>
-
-    <div id="insert" class="tab-content">
-        <div id="insert-container">
-            <h3>Insert Blank Page</h3>
-            <input type="number" id="insert-page-number" placeholder="Page number to insert blank page" />
-            <button id="insert-blank-page">Insert Blank Page</button>
-        </div>
-    </div>
-
-    <div id="rotate" class="tab-content">
-        <div id="rotate-container">
-            <h3>Rotate PDF Page</h3>
-            <input type="number" id="rotate-page-number" placeholder="Page number" min="1" />
-            <input type="number" id="rotation-degree" placeholder="Degrees to rotate (clockwise)" />
-            <button id="rotate-page">Rotate Page</button>
-        </div>
-    </div>
-
-    <div id="crop" class="tab-content">
-        <div id="crop-container">
-            <h3>Crop PDF Page</h3>
-            <input type="number" id="crop-page-number" placeholder="Page number" min="1" />
-            <input type="number" id="crop-x" placeholder="X coordinate" min="0" />
-            <input type="number" id="crop-y" placeholder="Y coordinate" min="0" />
-            <input type="number" id="crop-width" placeholder="Width" min="0" />
-            <input type="number" id="crop-height" placeholder="Height" min="0" />
-            <button id="crop-page">Crop Page</button>
-            <button id="start-crop">Visual Crop</button>
-            <button id="confirm-crop">Confirm Crop</button>
-        </div>
-    </div>
-
-    <div id="merge" class="tab-content">
-        <div id="merge-container">
-            <h3>Merge Multiple PDFs</h3>
-            <div id="pdf-inputs-container">
-                <div class="pdf-input-container">
-                    <input type="file" class="pdf-input" accept="application/pdf" />
-                </div>
-                <div class="pdf-input-container">
-                    <input type="file" class="pdf-input" accept="application/pdf" />
-                </div>
+        <div id="load" class="tab-content">
+            <div id="load-container">
+                <h3>Load PDF</h3>
+                <input type="file" id="file-input" accept="application/pdf" />
             </div>
-            <button id="add-pdf-input">Add Another PDF</button>
-            <button id="merge-pdfs">Merge PDFs</button>
         </div>
-    </div>
 
-    <div id="extract" class="tab-content">
-        <div id="extract-container">
-            <h3>Extract Page as Image</h3>
-            <input type="number" id="extract-page-number" placeholder="Page number" min="1" />
-            <button id="extract-page">Extract Page</button>
-            <img id="extracted-page-img" style="display: none;" />
+        <div id="delete" class="tab-content">
+            <div id="delete-container">
+                <h3>Delete PDF Page</h3>
+                <input type="number" id="delete-page-number" placeholder="Page number" min="1" />
+                <button id="delete-page">Delete Page</button>
+            </div>
         </div>
-    </div>
 
-    <div id="download" class="tab-content">
-        <div id="download-container">
-            <h3>Download the PDF</h3>
-            <button id="download-page">Download Page</button>
+        <div id="insert" class="tab-content">
+            <div id="insert-container">
+                <h3>Insert Blank Page</h3>
+                <input type="number" id="insert-page-number" placeholder="Page number to insert blank page" />
+                <button id="insert-blank-page">Insert Blank Page</button>
+            </div>
         </div>
+
+        <div id="rotate" class="tab-content">
+            <div id="rotate-container">
+                <h3>Rotate PDF Page</h3>
+                <input type="number" id="rotate-page-number" placeholder="Page number" min="1" />
+                <input type="number" id="rotation-degree" placeholder="Degrees to rotate (clockwise)" />
+                <button id="rotate-page">Rotate Page</button>
+            </div>
+        </div>
+
+        <div id="crop" class="tab-content">
+            <div id="crop-container">
+                <h3>Crop PDF Page</h3>
+                <input type="number" id="crop-page-number" placeholder="Page number" min="1" />
+                <input type="number" id="crop-x" placeholder="X coordinate" min="0" />
+                <input type="number" id="crop-y" placeholder="Y coordinate" min="0" />
+                <input type="number" id="crop-width" placeholder="Width" min="0" />
+                <input type="number" id="crop-height" placeholder="Height" min="0" />
+                <button id="crop-page">Crop Page</button>
+                <button id="start-crop">Visual Crop</button>
+                <button id="confirm-crop">Confirm Crop</button>
+            </div>
+        </div>
+
+        <div id="merge" class="tab-content">
+            <div id="merge-container">
+                <h3>Merge Multiple PDFs</h3>
+                <div id="pdf-inputs-container">
+                    <div class="pdf-input-container">
+                        <input type="file" class="pdf-input" accept="application/pdf" />
+                    </div>
+                    <div class="pdf-input-container">
+                        <input type="file" class="pdf-input" accept="application/pdf" />
+                    </div>
+                </div>
+                <button id="add-pdf-input">Add Another PDF</button>
+                <button id="merge-pdfs">Merge PDFs</button>
+            </div>
+        </div>
+
+        <div id="extract" class="tab-content">
+            <div id="extract-container">
+                <h3>Extract Page as Image</h3>
+                <input type="number" id="extract-page-number" placeholder="Page number" min="1" />
+                <button id="extract-page">Extract Page</button>
+                <img id="extracted-page-img" style="display: none;" />
+            </div>
+        </div>
+
+        <div id="download" class="tab-content">
+            <div id="download-container">
+                <h3>Download the PDF</h3>
+                <button id="download-page">Download Page</button>
+            </div>
+        </div>
+
     </div>
 
     <div id="content-container">

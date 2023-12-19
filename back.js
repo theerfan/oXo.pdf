@@ -15,41 +15,33 @@ async function renderPDF(pdfBytes) {
         document.getElementById('pdf-container').innerHTML = ''; // Clear existing content
 
         for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
-            const pageContainer = document.createElement('div');
-            pageContainer.className = 'page-container';
-            document.getElementById('pdf-container').appendChild(pageContainer);
+            
 
-            // Add the page number element
-            const pageNumberElement = document.createElement('div');
-            pageNumberElement.className = 'page-number';
-            pageNumberElement.innerText = `Page ${pageNum}`;
-            pageContainer.appendChild(pageNumberElement);
+            renderPage(pageNum);
 
-            // renderPage(pageNum);
-
-            pdf.getPage(pageNum).then(page => {
-                const scale = 1.5;
-                const viewport = page.getViewport({ scale: scale });
-                const canvas = document.createElement('canvas');
-                const context = canvas.getContext('2d');
-                canvas.id = `page-${pageNum}`;
-                canvas.height = viewport.height;
-                canvas.width = viewport.width;
+            // pdf.getPage(pageNum).then(page => {
+            //     const scale = 1.5;
+            //     const viewport = page.getViewport({ scale: scale });
+            //     const canvas = document.createElement('canvas');
+            //     const context = canvas.getContext('2d');
+            //     canvas.id = `page-${pageNum}`;
+            //     canvas.height = viewport.height;
+            //     canvas.width = viewport.width;
 
 
-                // Center canvas
-                canvas.style.marginLeft = 'auto';
-                canvas.style.marginRight = 'auto';
-                canvas.style.display = 'block';
+            //     // Center canvas
+            //     canvas.style.marginLeft = 'auto';
+            //     canvas.style.marginRight = 'auto';
+            //     canvas.style.display = 'block';
 
-                pageContainer.appendChild(canvas);
+            //     pageContainer.appendChild(canvas);
 
-                const renderContext = {
-                    canvasContext: context,
-                    viewport: viewport
-                };
-                page.render(renderContext);
-            });
+            //     const renderContext = {
+            //         canvasContext: context,
+            //         viewport: viewport
+            //     };
+            //     page.render(renderContext);
+            // });
         }
 
         pdf.getOutline().then(outline => {
@@ -65,26 +57,35 @@ async function renderPDF(pdfBytes) {
 // Assuming you have a PDF file loaded as `pdfFile`
 
 async function renderPage(pageNumber) {
+    const pageContainer = document.createElement('div');
+    pageContainer.className = 'page-container';
+    pageContainer.id = `page-container-${pageNumber}`;
+    document.getElementById('pdf-container').appendChild(pageContainer);
+
+    // Add the page number element
+    const pageNumberElement = document.createElement('div');
+    pageNumberElement.className = 'page-number';
+    pageNumberElement.innerText = `Page ${pageNumber}`;
+    pageContainer.appendChild(pageNumberElement);
+
     pdfFile.getPage(pageNumber).then(page => {
         // Prepare canvas for PDF page
-        var viewport = page.getViewport({ scale: 1.0 });
+        var viewport = page.getViewport({ scale: 1.5 });
         var canvas = document.createElement('canvas');
-        var ctx = canvas.getContext('2d');
+        var context = canvas.getContext('2d');
+        canvas.id = `page-${pageNumber}`;
         canvas.height = viewport.height;
         canvas.width = viewport.width;
 
         // Render the page into the canvas
         var renderContext = {
-            canvasContext: ctx,
+            canvasContext: context,
             viewport: viewport
         };
         var renderTask = page.render(renderContext);
 
         // Append the canvas to your page container
-        var container = document.createElement('div');
-        container.style.position = 'relative';
-        container.appendChild(canvas);
-        document.getElementById('pdf-container').appendChild(container);
+        pageContainer.appendChild(canvas);
 
         // Render text layer
         renderTask.promise.then(() => {
@@ -93,12 +94,12 @@ async function renderPage(pageNumber) {
             // Create a new div for the text layer
             var textLayerDiv = document.createElement('div');
             textLayerDiv.className = 'textLayer';
-            textLayerDiv.style.position = 'absolute';
+            textLayerDiv.style.position = 'relative';
             textLayerDiv.style.top = 0;
             textLayerDiv.style.left = 0;
             textLayerDiv.style.height = `${viewport.height}px`;
             textLayerDiv.style.width = `${viewport.width}px`;
-            container.appendChild(textLayerDiv);
+            pageContainer.appendChild(textLayerDiv);
 
             // Render the text items in the text layer div
             pdfjsLib.renderTextLayer({
@@ -364,7 +365,14 @@ document.getElementById('extract-page').addEventListener('click', async () => {
         // Convert canvas to an image
         const img = document.getElementById('extracted-page-img');
         img.src = canvas.toDataURL('image/png');
-        img.style.display = 'block';
+        // Download the image
+        const link = document.createElement('a');
+        link.textContent = 'Download Image';
+        link.href = img.src;
+        link.download = 'page.png';
+        link.click();
+        // img.style.display = 'block';
+
 
     } catch (error) {
         console.error('Error extracting page:', error);
