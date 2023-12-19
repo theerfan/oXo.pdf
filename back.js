@@ -93,8 +93,8 @@ async function renderPage(pageNumber) {
         }).then(textContent => {
             // Create a new div for the text layer
             var textLayerDiv = document.createElement('div');
-            textLayerDiv.className = 'textLayer';
-            textLayerDiv.style.position = 'relative';
+            textLayerDiv.className = 'text-layer';
+            // textLayerDiv.style.position = 'relative';
             textLayerDiv.style.top = 0;
             textLayerDiv.style.left = 0;
             textLayerDiv.style.height = `${viewport.height}px`;

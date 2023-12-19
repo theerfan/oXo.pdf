@@ -137,16 +137,20 @@ body {
     /* Make sure it's visible */
     z-index: 10;
     /* Ensure it's above other content */
-    max-width: 80vw; /* 20% of the viewport width */
+    max-width: 80vw;
+    /* 20% of the viewport width */
     min-width: 100px;
     width: 20vw;
 }
 
 #resize-grip {
-    width: 10px; /* Width of the grip area */
+    width: 10px;
+    /* Width of the grip area */
     height: 100%;
-    background-color: #ccc; /* Just for visibility, style as needed */
-    cursor: ew-resize; /* Cursor indicates the element is resizable */
+    background-color: #ccc;
+    /* Just for visibility, style as needed */
+    cursor: ew-resize;
+    /* Cursor indicates the element is resizable */
     position: absolute;
     right: 0;
     top: 0;
@@ -174,8 +178,10 @@ body {
 }
 
 #toggle-button.hidden-bookmarks {
-    padding: 5px 16px; /* Reduced padding */
-    font-size: 0.8em; /* Smaller font size */
+    padding: 5px 16px;
+    /* Reduced padding */
+    font-size: 0.8em;
+    /* Smaller font size */
     width: inherit;
     min-width: inherit;
     max-width: 100%;
@@ -272,7 +278,7 @@ body {
 /* Add styles for other handles (right, top, bottom, etc.) */
 
 
-#text-layer { 
+#text-layer {
     position: absolute;
     left: 0;
     top: 0;
@@ -281,11 +287,47 @@ body {
     overflow: hidden;
     opacity: 0.2;
     line-height: 1.0;
+    z-index: 10;
 }
-#text-layer > div {
+
+#text-layer>div {
     color: transparent;
     position: absolute;
     white-space: pre;
     cursor: text;
     transform-origin: 0% 0%;
+}
+
+/* Style for the page container */
+.page-container {
+    position: relative;
+    /* Needed for absolute positioning of children */
+    margin-bottom: 10px;
+    /* Optional: Adds space between pages */
+}
+
+/* Style for the PDF canvas (if you are using a canvas to render the PDF) */
+canvas {
+    width: 100%;
+    /* Optional: Adjust as needed */
+    height: auto;
+    /* Optional: Adjust as needed */
+    display: block;
+    /* Removes extra space below the canvas */
+}
+
+/* Style for the overlay text */
+.overlay-text {
+    position: absolute;
+    /* Positions the text over the page */
+    top: 10px;
+    /* Adjust as needed for correct positioning */
+    left: 10px;
+    /* Adjust as needed for correct positioning */
+    color: red;
+    /* Example text color */
+    font-size: 20px;
+    /* Example font size */
+    z-index: 10;
+    /* Ensures the text is above the PDF page */
 }
