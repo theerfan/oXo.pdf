@@ -9921,16 +9921,23 @@ const PDFViewerApplication = {
   async initialize(appConfig) {
     this.preferences = this.externalServices.createPreferences();
     this.appConfig = appConfig;
+
+    let l10nPromise;
+    l10nPromise = this.externalServices.createL10n();
+    this.l10n = await l10nPromise;
+    
+    await this._initializeViewerComponents();
+
     await this._initializeOptions();
     this._forceCssTheme();
     await this._initializeL10n();
     if (this.isViewerEmbedded && AppOptions.get("externalLinkTarget") === LinkTarget.NONE) {
       AppOptions.set("externalLinkTarget", LinkTarget.TOP);
     }
-    await this._initializeViewerComponents();
     this.bindEvents();
     this.bindWindowEvents();
     const appContainer = appConfig.appContainer || document.documentElement;
+
     this.l10n.translate(appContainer).then(() => {
       this.eventBus.dispatch("localized", {
         source: this
@@ -10434,8 +10441,10 @@ const PDFViewerApplication = {
       ...apiParams,
       ...args
     };
-    if (!this.initialized) {
-      this._initializeViewerComponents();
+    // if the l10n is null, means its not initialized yet.
+    if (this.l10n == null || this.pdfLinkService == null || this.pdfViewer == null || this.pdfThumbnailViewer == null || this.pdfScriptingManager == null) {
+      webViewerLoad();
+      // this._initializeViewerComponents();
     }
     if (args.url) {
       try {
@@ -12083,7 +12092,7 @@ class L10n {
     try {
       this.#l10n.connectRoot(element);
       await this.#l10n.translateRoots();
-    } catch {}
+    } catch { }
   }
   pause() {
     this.#l10n.pauseObserving();
@@ -12767,6 +12776,8 @@ if (document.readyState === "interactive" || document.readyState === "complete")
 } else {
   document.addEventListener("DOMContentLoaded", webViewerLoad, true);
 }
+
+globalThis.webViewerLoad = webViewerLoad;
 
 var __webpack_exports__PDFViewerApplication = __webpack_exports__.PDFViewerApplication;
 var __webpack_exports__PDFViewerApplicationConstants = __webpack_exports__.PDFViewerApplicationConstants;
