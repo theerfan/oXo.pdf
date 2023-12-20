@@ -56,6 +56,9 @@ __webpack_require__.d(__webpack_exports__, {
   PDFViewerApplicationOptions: () => (/* reexport */ AppOptions)
 });
 
+;// [my imports]
+// import fetch from 'cross-fetch';
+
 ;// CONCATENATED MODULE: ./extensions/firefox/tools/l10n.js
 
 
@@ -10433,12 +10436,15 @@ const PDFViewerApplication = {
     };
     if (args.url) {
       try {
+        const proxy_url = "http://localhost:8000/download/";
         // Define a callback function to fetch the data once it is downloaded.
-        const url = args.url;
+        const url = proxy_url + args.url;
         const filename = args.filename || getPdfFilenameFromUrl(url);
         // Download the data with raw javascript, no download manager.
         const data = await fetch(url).then(response => response.arrayBuffer());
-        var a  = 12;
+        // Remove the url from the params, and add the data.
+        delete params.url;
+        params.data = data;
       }
       catch (ex) {
         this._documentError("unable_to_download_pdf", ex);

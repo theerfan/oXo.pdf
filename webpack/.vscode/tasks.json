@@ -7,7 +7,6 @@
             "command": "node",
             "args": ["server.js"],
             "isBackground": true,
-            "dependsOn": ["Start CORS Proxy Server"],
             "presentation": {
                 "reveal": "silent"
             },
@@ -23,26 +22,5 @@
                 }
             }
         },
-        {
-            "label": "Start CORS Proxy Server",
-            "type": "shell",
-            "command": "node",
-            "args": ["cors_server.js"],
-            "isBackground": true,
-            "presentation": {
-                "reveal": "silent"
-            },
-            "problemMatcher": {
-                "owner": "custom",
-                "pattern": {
-                    "regexp": "^.*$"
-                },
-                "background": {
-                    "activeOnStart": true,
-                    "beginsPattern": "^.*CORS proxy running.*$",
-                    "endsPattern": "^.*$"
-                }
-            }
-        }
     ]
 }

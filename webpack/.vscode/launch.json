@@ -2,7 +2,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Launch Firefox",
+            "name": "Viewer.html",
             "type": "firefox",
             "request": "launch",
             "reAttach": true,
