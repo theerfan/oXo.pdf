@@ -153,6 +153,7 @@ __webpack_require__.d(__webpack_exports__, {
     translate: translateFragment
   };
 })(undefined);
+
 ;// CONCATENATED MODULE: ./web/ui_utils.js
 const DEFAULT_SCALE_VALUE = "auto";
 const DEFAULT_SCALE = 1.0;
@@ -9922,6 +9923,7 @@ const PDFViewerApplication = {
     this.preferences = this.externalServices.createPreferences();
     this.appConfig = appConfig;
 
+    // TODO: Come back here!
     let l10nPromise;
     l10nPromise = this.externalServices.createL10n();
     this.l10n = await l10nPromise;
