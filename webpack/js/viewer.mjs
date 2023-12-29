@@ -139,7 +139,9 @@ __webpack_require__.d(__webpack_exports__, {
     },
     getDirection() {
       const rtlList = ["ar", "he", "fa", "ps", "ur"];
-      const shortCode = gLanguage.split("-")[0];
+      // TODO: Change this later
+      const shortCode = "en";
+      // const shortCode = gLanguage.split("-")[0];
       return rtlList.includes(shortCode) ? "rtl" : "ltr";
     },
     getReadyState() {
@@ -9927,7 +9929,7 @@ const PDFViewerApplication = {
     let l10nPromise;
     l10nPromise = this.externalServices.createL10n();
     this.l10n = await l10nPromise;
-    
+
     await this._initializeViewerComponents();
 
     await this._initializeOptions();
@@ -10459,6 +10461,7 @@ const PDFViewerApplication = {
         // Remove the url from the params, and add the data.
         delete params.url;
         params.data = data;
+        await this._initializeViewerComponents();
       }
       catch (ex) {
         this._documentError("unable_to_download_pdf", ex);
