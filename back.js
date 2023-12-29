@@ -12,10 +12,11 @@ async function renderPDF(pdfBytes) {
     // Load the PDF file using pdf.js
     pdfjsLib.getDocument({ data: typedArray }).promise.then(pdf => {
         pdfFile = pdf;
-        document.getElementById('pdf-container').innerHTML = ''; // Clear existing content
+        const pdfContainer = document.getElementById('pdf-container');
+        pdfContainer.innerHTML = ''; // Clear existing content
 
         for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
-            
+
 
             renderPage(pageNum);
 
@@ -60,57 +61,57 @@ async function renderPage(pageNumber) {
     const pageContainer = document.createElement('div');
     pageContainer.className = 'page-container';
     pageContainer.id = `page-container-${pageNumber}`;
+    pageContainer.style.position = 'relative';
     document.getElementById('pdf-container').appendChild(pageContainer);
 
-    // Add the page number element
     const pageNumberElement = document.createElement('div');
     pageNumberElement.className = 'page-number';
     pageNumberElement.innerText = `Page ${pageNumber}`;
     pageContainer.appendChild(pageNumberElement);
 
+    const scale = 1.5; // Define scale
+
     pdfFile.getPage(pageNumber).then(page => {
-        // Prepare canvas for PDF page
-        var viewport = page.getViewport({ scale: 1.5 });
+        var viewport = page.getViewport({ scale: scale });
         var canvas = document.createElement('canvas');
         var context = canvas.getContext('2d');
         canvas.id = `page-${pageNumber}`;
         canvas.height = viewport.height;
         canvas.width = viewport.width;
 
-        // Render the page into the canvas
         var renderContext = {
             canvasContext: context,
             viewport: viewport
         };
         var renderTask = page.render(renderContext);
 
-        // Append the canvas to your page container
-        pageContainer.appendChild(canvas);
-
-        // Render text layer
         renderTask.promise.then(() => {
             return page.getTextContent();
         }).then(textContent => {
-            // Create a new div for the text layer
             var textLayerDiv = document.createElement('div');
             textLayerDiv.className = 'text-layer';
-            // textLayerDiv.style.position = 'relative';
+            textLayerDiv.style.position = 'absolute';
             textLayerDiv.style.top = 0;
             textLayerDiv.style.left = 0;
             textLayerDiv.style.height = `${viewport.height}px`;
             textLayerDiv.style.width = `${viewport.width}px`;
-            pageContainer.appendChild(textLayerDiv);
+            textLayerDiv.style.transform = `scale(${scale})`; // Apply scale
+            textLayerDiv.style.transformOrigin = 'top left'; // Set transform origin
 
-            // Render the text items in the text layer div
+            pageContainer.insertBefore(textLayerDiv, canvas);
+
             pdfjsLib.renderTextLayer({
                 textContent: textContent,
                 container: textLayerDiv,
                 viewport: viewport,
-                textDivs: []
+                enhanceTextSelection: true // Improve text selection if needed
             });
         });
+
+        pageContainer.appendChild(canvas);
     });
 }
+
 
 
 // Gets the PDF file from the input element and renders it to the page
@@ -222,9 +223,10 @@ function renderBookmarks(bookmarks, container, pdfDoc, level = 0) {
         item.style.cursor = 'pointer';
         item.onclick = async () => {
             if (bookmark.dest) {
-                const pageRef = bookmark.dest[0];
+                const dest = bookmark.dest;
                 // Resolve the destination and navigate to the specific page
-                // const destination = await pdfDoc.getDestination(dest);
+                const destination = await pdfDoc.getDestination(dest);
+                const pageRef = destination[0];
                 const pageIndex = await pdfDoc.getPageIndex(pageRef);
                 document.getElementById('page-' + (pageIndex + 1)).scrollIntoView({ behavior: 'smooth' });
             }
@@ -232,7 +234,7 @@ function renderBookmarks(bookmarks, container, pdfDoc, level = 0) {
 
         // Render any child bookmarks
         if (bookmark.items && bookmark.items.length > 0) {
-            renderBookmarks(bookmark.items, container, pdfDoc, level + 1);
+            renderBookmarks(bookmark.items, item, pdfDoc, level + 1);
         }
     });
 
@@ -597,18 +599,18 @@ let isBookmarksResizing = false;
 const bookmarksContainer = document.getElementById('bookmarks-super-container');
 const resizeGrip = document.getElementById('resize-grip');
 
-resizeGrip.addEventListener('mousedown', function(e) {
+resizeGrip.addEventListener('mousedown', function (e) {
     e.preventDefault();
     isBookmarksResizing = true;
 });
 
-document.addEventListener('mousemove', function(e) {
+document.addEventListener('mousemove', function (e) {
     if (isBookmarksResizing) {
         let newWidth = e.clientX - bookmarksContainer.getBoundingClientRect().left;
         bookmarksContainer.style.width = newWidth + 'px';
     }
 });
 
-document.addEventListener('mouseup', function(e) {
+document.addEventListener('mouseup', function (e) {
     isBookmarksResizing = false;
 });
