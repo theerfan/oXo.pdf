@@ -8,7 +8,8 @@
             "reAttach": true,
             "url": "http://localhost:8000/viewer.html", // Adjust the URL if needed
             "webRoot": "${workspaceFolder}",
-            "preLaunchTask": "Start Node Server"
+            "preLaunchTask": "Start Node Server",
+            "postDebugTask": "Terminate Node Server"
         }
     ]
 }

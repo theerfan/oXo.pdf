@@ -9,6 +9,12 @@ const port = 8000; // You can choose any port you prefer
 // Serve static files from the directory where this script is located
 app.use(express.static(path.join(__dirname)));
 
+// Serve static files from the /cdn directory
+app.use('/cdn', express.static(path.join(__dirname, 'cdn')));
+
+app.use('/locales', express.static(path.join(__dirname, 'cdn')));
+
+
 // Function to dynamically determine the target URL
 function getTarget(req) {
   // Extract the target URL from the request path

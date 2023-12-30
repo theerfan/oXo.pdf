@@ -5,10 +5,13 @@
             "label": "Start Node Server",
             "type": "shell",
             "command": "node",
-            "args": ["server.js"],
+            "args": [
+                "server.js"
+            ],
             "isBackground": true,
             "presentation": {
-                "reveal": "silent"
+                "reveal": "silent",
+                "panel": "dedicated"
             },
             "problemMatcher": {
                 "owner": "custom",
@@ -22,5 +25,20 @@
                 }
             }
         },
+        {
+            "label": "Terminate Node Server",
+            "type": "shell",
+            "command": "powershell",
+            "args": [
+                "-Command",
+                "Stop-Process -Name 'node' -ErrorAction SilentlyContinue"
+            ],
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "silent",
+                "panel": "dedicated",
+                "close": true
+            }
+        }
     ]
 }

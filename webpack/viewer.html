@@ -25,10 +25,52 @@ See https://github.com/adobe-type-tools/cmap-resources
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name='defaultLanguage' content='en-US' />
   <title>wave_properties.dvi - wave_properties.pdf</title>
 
   <!-- This snippet is used in the Firefox extension (included from viewer.html) -->
   <script src="js/pdf.mjs" type="module"></script>
+  <script type="module">
+    import { FluentBundle, FluentResource } from 'https://cdn.skypack.dev/@fluent/bundle';
+    import { DOMLocalization } from 'http://localhost:8000/cdn/fluent-dom/index.js';
+
+    async function fetchResource(locale, filename) {
+      const response = await fetch(`http://localhost:8000/locales/${locale}/${filename}`);
+      const ftl = await response.text();
+      return new FluentResource(ftl);
+    }
+
+    async function* generateBundles(preferredLocales) {
+      const defaultLocale = 'en-US'; // Default locale
+      const availableLocales = ['en-US'];
+
+      // Determine the best available locale
+      const bestLocale = preferredLocales.find(locale => availableLocales.includes(locale)) || defaultLocale;
+
+      // Fetch and yield bundles for the bestLocale and then defaultLocale if they are different
+      const filename = 'messages.ftl';
+      yield new FluentBundle(bestLocale, { resources: await fetchResource(bestLocale, filename) });
+
+      if (bestLocale !== defaultLocale) {
+        yield new FluentBundle(defaultLocale, { resources: await fetchResource(defaultLocale, filename) });
+      }
+    }
+
+    async function setupLocalization() {
+      // Load the FTL file for the current language
+      const resource = new FluentResource('your-locale');
+
+      const bundle = new FluentBundle("en-US");
+      bundle.addResource(resource);
+
+      // Initialize document.l10n
+      document.l10n = new DOMLocalization([bundle], generateBundles);
+      // document.l10n.translateDocument();
+    }
+
+    setupLocalization();
+
+  </script>
 
   <link rel="stylesheet" href="viewer.css">
 
