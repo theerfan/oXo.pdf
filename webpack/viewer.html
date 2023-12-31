@@ -48,7 +48,7 @@ See https://github.com/adobe-type-tools/cmap-resources
       const bestLocale = preferredLocales.find(locale => availableLocales.includes(locale)) || defaultLocale;
 
       // Fetch and yield bundles for the bestLocale and then defaultLocale if they are different
-      const filename = 'messages.ftl';
+      const filename = 'viewer.ftl';
       yield new FluentBundle(bestLocale, { resources: await fetchResource(bestLocale, filename) });
 
       if (bestLocale !== defaultLocale) {
@@ -58,7 +58,7 @@ See https://github.com/adobe-type-tools/cmap-resources
 
     async function setupLocalization() {
       // Load the FTL file for the current language
-      const resource = new FluentResource('your-locale');
+      const resource = new FluentResource('Example');
 
       const bundle = new FluentBundle("en-US");
       bundle.addResource(resource);
