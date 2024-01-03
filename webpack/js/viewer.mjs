@@ -11379,6 +11379,7 @@ const PDFViewerApplication = {
       webViewerLoad();
       this.l10n = new GenericL10n("en-US");
       this._initializeViewerComponents();
+      this.bindEvents();
     }
     this.pdfLoadingTask = loadingTask;
     loadingTask.onPassword = (updateCallback, reason) => {
