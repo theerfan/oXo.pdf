@@ -11433,9 +11433,15 @@ const PDFViewerApplication = {
       const blob = new Blob([data], {
         type: "application/pdf"
       });
-      await this.downloadManager.download(blob, url, filename, options);
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);  
+      link.download = filename;
+      link.dispatchEvent(new MouseEvent("click"));
     } catch {
-      await this.downloadManager.downloadUrl(url, filename, options);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      link.dispatchEvent(new MouseEvent("click"));
     }
   },
   async save(options = {}) {
@@ -12883,6 +12889,7 @@ function webViewerReportTelemetry({
 }) {
   PDFViewerApplication.externalServices.reportTelemetry(details);
 }
+// const PDFPrintServiceFactory = Firefox
 const PDFPrintServiceFactory = {
   instance: {
     supportsPrinting: false,
