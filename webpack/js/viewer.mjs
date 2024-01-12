@@ -10212,7 +10212,8 @@ class SecondaryToolbar {
       element: options.printButton,
       eventName: "print",
       close: true
-    }, {
+    },
+    {
       element: options.downloadButton,
       eventName: "download",
       close: true
@@ -10486,6 +10487,10 @@ class Toolbar {
     }, {
       element: options.print,
       eventName: "print"
+    },
+    {
+      element: options.crop,
+      eventName: "crop"
     }, {
       element: options.download,
       eventName: "download"
@@ -10830,6 +10835,7 @@ const PDFViewerApplication = {
   initialBookmark: document.location.hash.substring(1),
   _initializedCapability: new PromiseCapability(),
   appConfig: null,
+  pdfDoc: null,
   pdfDocument: null,
   pdfLoadingTask: null,
   printService: null,
@@ -11367,6 +11373,7 @@ const PDFViewerApplication = {
         const data = await fetch(url).then(response => response.arrayBuffer());
         // Remove the url from the params, and add the data.
         delete loadingTaskParams.url;
+        this.pdfDoc = await PDFLib.PDFDocument.load(data);
         loadingTaskParams.data = data;
       }
       catch (ex) {
@@ -11434,7 +11441,7 @@ const PDFViewerApplication = {
         type: "application/pdf"
       });
       const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);  
+      link.href = URL.createObjectURL(blob);
       link.download = filename;
       link.dispatchEvent(new MouseEvent("click"));
     } catch {
@@ -12009,6 +12016,7 @@ const PDFViewerApplication = {
     eventBus._on("switchannotationeditormode", webViewerSwitchAnnotationEditorMode);
     eventBus._on("switchannotationeditorparams", webViewerSwitchAnnotationEditorParams);
     eventBus._on("print", webViewerPrint);
+    eventBus._on("crop", webViewerCrop);
     eventBus._on("download", webViewerDownload);
     eventBus._on("openinexternalapp", webViewerOpenInExternalApp);
     eventBus._on("firstpage", webViewerFirstPage);
@@ -12323,6 +12331,45 @@ function webViewerSwitchAnnotationEditorParams(evt) {
 function webViewerPrint() {
   PDFViewerApplication.triggerPrinting();
 }
+function webViewerCrop() {
+  const currentPageNumber = PDFViewerApplication.pdfViewer.currentPageNumber;
+  const page = PDFViewerApplication.pdfDoc.getPages()[currentPageNumber - 1];
+  const cropBox = page.getCropBox();
+  const mediaBox = page.getMediaBox();
+  const cropWidth = cropBox[2] - cropBox[0];
+  const cropHeight = cropBox[3] - cropBox[1];
+  const mediaWidth = mediaBox[2] - mediaBox[0];
+  const mediaHeight = mediaBox[3] - mediaBox[1];
+  const offsetX = (mediaWidth - cropWidth) / 2;
+  const offsetY = (mediaHeight - cropHeight) / 2;
+  const transform = [
+    1,
+    0,
+    0,
+    1,
+    -1 * cropBox[0] + offsetX,
+    -1 * cropBox[1] + offsetY
+  ];
+  const newViewport = page.getViewport({
+    transform,
+    dontFlip: true
+  });
+  PDFViewerApplication.pdfViewer.currentScaleValue = PDFViewerApplication.pdfViewer.currentScaleValue;
+  PDFViewerApplication.pdfViewer.scrollPageIntoView({
+    pageNumber: currentPageNumber,
+    destArray: [
+      null,
+      {
+        name: "XYZ"
+      },
+      newViewport[0] + newViewport[2] / 2,
+      newViewport[1] + newViewport[3] / 2,
+      0
+    ],
+    allowNegativeOffset: true
+  });
+}
+// PDFViewerApplication.triggerPrinting();
 function webViewerDownload() {
   PDFViewerApplication.downloadOrSave();
 }
@@ -13612,6 +13659,7 @@ function getViewerConfiguration() {
       zoomOut: document.getElementById("zoomOut"),
       viewFind: document.getElementById("viewFind"),
       print: document.getElementById("print"),
+      crop: document.getElementById("crop"),
       editorFreeTextButton: document.getElementById("editorFreeText"),
       editorFreeTextParamsToolbar: document.getElementById("editorFreeTextParamsToolbar"),
       editorInkButton: document.getElementById("editorInk"),

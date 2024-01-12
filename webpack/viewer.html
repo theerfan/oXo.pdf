@@ -32,10 +32,11 @@ See https://github.com/adobe-type-tools/cmap-resources
   <script src="js/pdf.mjs" type="module"></script>
   <!-- <script type="module">
     
-
   </script> -->
 
   <link rel="stylesheet" href="viewer.css">
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
 
   <script src="js/viewer.mjs" type="module"></script>
 </head>
@@ -366,6 +367,11 @@ See https://github.com/adobe-type-tools/cmap-resources
               </div>
 
               <div id="editorModeSeparator" class="verticalToolbarSeparator"></div>
+
+              <button id="crop" class="toolbarButton hiddenMediumView" title="Crop" tabindex="40"
+                data-l10n-id="pdfjs-print-button">
+                <span data-l10n-id="pdfjs-print-button-label">Print</span>
+              </button>
 
               <button id="print" class="toolbarButton hiddenMediumView" title="Print" tabindex="41"
                 data-l10n-id="pdfjs-print-button">
