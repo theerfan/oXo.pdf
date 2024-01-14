@@ -10836,6 +10836,9 @@ const PDFViewerApplication = {
   _initializedCapability: new PromiseCapability(),
   appConfig: null,
   pdfDoc: null,
+  cropMode: false,
+  cropResizing: false,
+  cropResizingDirection: null,
   pdfDocument: null,
   pdfLoadingTask: null,
   printService: null,
@@ -12331,43 +12334,170 @@ function webViewerSwitchAnnotationEditorParams(evt) {
 function webViewerPrint() {
   PDFViewerApplication.triggerPrinting();
 }
+
+function createCropOverlay() {
+  const cropOverlay = document.createElement("div");
+  cropOverlay.id = "crop-overlay";
+  cropOverlay.style.position = "absolute";
+  cropOverlay.style.top = "0";
+  cropOverlay.style.left = "0";
+  cropOverlay.style.width = "100%";
+  cropOverlay.style.height = "100%";
+  cropOverlay.style.zIndex = "1000";
+  // Add the handles to the overlay
+  const cropLeft = document.createElement("div");
+  cropLeft.id = "crop-left-handle";
+  cropLeft.style.position = "absolute";
+  cropLeft.style.top = "0";
+  cropLeft.style.left = "0";
+  cropLeft.style.width = "10px";
+  cropLeft.style.height = "100%";
+  cropLeft.style.backgroundColor = "rgba(0, 0, 0, 0.5)";
+  cropLeft.style.cursor = "col-resize";
+  cropOverlay.appendChild(cropLeft);
+
+  const cropRight = document.createElement("div");
+  cropRight.id = "crop-right-handle";
+  cropRight.style.position = "absolute";
+  cropRight.style.top = "0";
+  cropRight.style.right = "0";
+  cropRight.style.width = "10px";
+  cropRight.style.height = "100%";
+  cropRight.style.backgroundColor = "rgba(0, 0, 0, 0.5)";
+  cropRight.style.cursor = "col-resize";
+  cropOverlay.appendChild(cropRight);
+
+  const cropTop = document.createElement("div");
+  cropTop.id = "crop-top-handle";
+  cropTop.style.position = "absolute";
+  cropTop.style.top = "0";
+  cropTop.style.left = "0";
+  cropTop.style.width = "100%";
+  cropTop.style.height = "10px";
+  cropTop.style.backgroundColor = "rgba(0, 0, 0, 0.5)";
+  cropTop.style.cursor = "row-resize";
+  cropOverlay.appendChild(cropTop);
+
+  const cropBottom = document.createElement("div");
+  cropBottom.id = "crop-bottom-handle";
+  cropBottom.style.position = "absolute";
+  cropBottom.style.bottom = "0";
+  cropBottom.style.left = "0";
+  cropBottom.style.width = "100%";
+  cropBottom.style.height = "10px";
+  cropBottom.style.backgroundColor = "rgba(0, 0, 0, 0.5)";
+  cropBottom.style.cursor = "row-resize";
+  cropOverlay.appendChild(cropBottom);
+}
+
 function webViewerCrop() {
   const currentPageNumber = PDFViewerApplication.pdfViewer.currentPageNumber;
   const page = PDFViewerApplication.pdfDoc.getPages()[currentPageNumber - 1];
-  const cropBox = page.getCropBox();
-  const mediaBox = page.getMediaBox();
-  const cropWidth = cropBox[2] - cropBox[0];
-  const cropHeight = cropBox[3] - cropBox[1];
-  const mediaWidth = mediaBox[2] - mediaBox[0];
-  const mediaHeight = mediaBox[3] - mediaBox[1];
-  const offsetX = (mediaWidth - cropWidth) / 2;
-  const offsetY = (mediaHeight - cropHeight) / 2;
-  const transform = [
-    1,
-    0,
-    0,
-    1,
-    -1 * cropBox[0] + offsetX,
-    -1 * cropBox[1] + offsetY
-  ];
-  const newViewport = page.getViewport({
-    transform,
-    dontFlip: true
-  });
-  PDFViewerApplication.pdfViewer.currentScaleValue = PDFViewerApplication.pdfViewer.currentScaleValue;
-  PDFViewerApplication.pdfViewer.scrollPageIntoView({
-    pageNumber: currentPageNumber,
-    destArray: [
-      null,
-      {
-        name: "XYZ"
-      },
-      newViewport[0] + newViewport[2] / 2,
-      newViewport[1] + newViewport[3] / 2,
-      0
-    ],
-    allowNegativeOffset: true
-  });
+
+  // get the div with class="page" and data-page-number=current page number
+  const pageDiv = document.querySelector(`div.page[data-page-number="${currentPageNumber}"]`);
+  const cropOverlay = createCropOverlay();
+
+  // Add the overlay to the page
+  pageDiv.appendChild(cropOverlay);
+
+  // TODO: The parts below should be moved to some init function
+
+  // Function to update the overlay's size
+  function resizeOverlay(mouseX, mouseY) {
+    const cropOverlay = document.getElementById('crop-overlay');
+    const scrollY = window.scrollY;
+    // const rect = cropOverlay.getBoundingClientRect();
+
+    if (PDFViewerApplication.cropResizingDirection === 'left') {
+      const oldWidth = parseInt(cropOverlay.style.width.replace('px', ''));
+      const oldLeft = parseInt(cropOverlay.style.left.replace('px', ''));
+      const newWidth = oldWidth + (oldLeft - mouseX);
+      if (newWidth > 0) {
+        cropOverlay.style.width = newWidth + 'px';
+        cropOverlay.style.left = mouseX + 'px';
+      }
+    }
+    else if (PDFViewerApplication.cropResizingDirection === 'right') {
+      const newWidth = mouseX - parseInt(cropOverlay.style.left.replace('px', ''));
+      if (newWidth > 0) {
+        cropOverlay.style.width = newWidth + 'px';
+      }
+    }
+    else if (PDFViewerApplication.cropResizingDirection === 'top') {
+      const oldHeight = parseInt(cropOverlay.style.height.replace('px', ''));
+      const oldTop = parseInt(cropOverlay.style.top.replace('px', ''));
+      const newHeight = oldHeight + (oldTop - (mouseY + scrollY));
+      if (newHeight > 0) {
+        cropOverlay.style.height = newHeight + 'px';
+        cropOverlay.style.top = (mouseY + scrollY) + 'px';
+      }
+    }
+    else if (PDFViewerApplication.resizeDirection === 'bottom') {
+      const newHeight = (mouseY + scrollY) - parseInt(cropOverlay.style.top.replace('px', ''));
+      if (newHeight > 0) {
+        cropOverlay.style.height = newHeight + 'px';
+      }
+    }
+  }
+
+  function handleMouseDown(resizeDir) {
+    return function (e) {
+      PDFViewerApplication.cropResizing = true;
+      PDFViewerApplication.cropResizingDirection = resizeDir;
+      e.stopPropagation();
+    };
+  }
+
+  function handleMouseUp(e) {
+    PDFViewerApplication.cropResizing = false;
+    PDFViewerApplication.cropResizingDirection = null;
+    e.stopPropagation();
+  }
+
+  function handleMouseMove(e) {
+    if (PDFViewerApplication.cropResizing && PDFViewerApplication.cropMode) {
+    }
+  }
+
+
+
+
+
+  // const cropBox = page.getCropBox();
+  // const mediaBox = page.getMediaBox();
+  // const cropWidth = cropBox[2] - cropBox[0];
+  // const cropHeight = cropBox[3] - cropBox[1];
+  // const mediaWidth = mediaBox[2] - mediaBox[0];
+  // const mediaHeight = mediaBox[3] - mediaBox[1];
+  // const offsetX = (mediaWidth - cropWidth) / 2;
+  // const offsetY = (mediaHeight - cropHeight) / 2;
+  // const transform = [
+  //   1,
+  //   0,
+  //   0,
+  //   1,
+  //   -1 * cropBox[0] + offsetX,
+  //   -1 * cropBox[1] + offsetY
+  // ];
+  // const newViewport = page.getViewport({
+  //   transform,
+  //   dontFlip: true
+  // });
+  // PDFViewerApplication.pdfViewer.currentScaleValue = PDFViewerApplication.pdfViewer.currentScaleValue;
+  // PDFViewerApplication.pdfViewer.scrollPageIntoView({
+  //   pageNumber: currentPageNumber,
+  //   destArray: [
+  //     null,
+  //     {
+  //       name: "XYZ"
+  //     },
+  //     newViewport[0] + newViewport[2] / 2,
+  //     newViewport[1] + newViewport[3] / 2,
+  //     0
+  //   ],
+  //   allowNegativeOffset: true
+  // });
 }
 // PDFViewerApplication.triggerPrinting();
 function webViewerDownload() {
