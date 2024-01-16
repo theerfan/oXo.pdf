@@ -2279,3 +2279,6 @@ const PDFPrintServiceFactory = {
     }
   }
 };
+
+
+export {PDFViewerApplication};

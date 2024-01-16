@@ -21,7 +21,8 @@
  */
 import { FluentBundle, FluentResource } from 'https://cdn.skypack.dev/@fluent/bundle';
 import { DOMLocalization } from 'http://localhost:8000/cdn/fluent-dom/index.js';
-import {CachedAsyncIterable} from 'http://localhost:8000/cdn/cached-iterable/index.js';
+import { PDFViewerApplication } from './web/app.js';
+import { AppOptions } from './web/app_options.js';
 
 async function fetchResource(locale, filename) {
   const response = await fetch(`http://localhost:8000/locales/${locale}/${filename}`);

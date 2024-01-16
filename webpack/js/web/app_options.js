@@ -254,3 +254,5 @@ class AppOptions {
     delete userOptions[name];
   }
 }
+
+export { AppOptions, OptionKind };
