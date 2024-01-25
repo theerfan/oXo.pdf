@@ -2466,7 +2466,71 @@ function webViewerPrint() {
   PDFViewerApplication.triggerPrinting();
 }
 
+//// ERFAN: this is the start of my crop code.
+
+// Function to update the overlay's size
+function resizeCropOverlay(mouseX, mouseY) {
+  const cropOverlay = document.getElementById('crop-overlay');
+  const scrollY = window.scrollY;
+  // const rect = cropOverlay.getBoundingClientRect();
+
+  if (PDFViewerApplication.cropResizingDirection === 'left') {
+    const oldWidth = parseInt(cropOverlay.style.width.replace('px', ''));
+    const oldLeft = parseInt(cropOverlay.style.left.replace('px', ''));
+    const newWidth = oldWidth + (oldLeft - mouseX);
+    if (newWidth > 0) {
+      cropOverlay.style.width = newWidth + 'px';
+      cropOverlay.style.left = mouseX + 'px';
+    }
+  }
+  else if (PDFViewerApplication.cropResizingDirection === 'right') {
+    const newWidth = mouseX - parseInt(cropOverlay.style.left.replace('px', ''));
+    if (newWidth > 0) {
+      cropOverlay.style.width = newWidth + 'px';
+    }
+  }
+  else if (PDFViewerApplication.cropResizingDirection === 'top') {
+    const oldHeight = parseInt(cropOverlay.style.height.replace('px', ''));
+    const oldTop = parseInt(cropOverlay.style.top.replace('px', ''));
+    const newHeight = oldHeight + (oldTop - (mouseY + scrollY));
+    if (newHeight > 0) {
+      cropOverlay.style.height = newHeight + 'px';
+      cropOverlay.style.top = (mouseY + scrollY) + 'px';
+    }
+  }
+  else if (PDFViewerApplication.resizeDirection === 'bottom') {
+    const newHeight = (mouseY + scrollY) - parseInt(cropOverlay.style.top.replace('px', ''));
+    if (newHeight > 0) {
+      cropOverlay.style.height = newHeight + 'px';
+    }
+  }
+}
+
+function handleCropMouseDown(resizeDir) {
+  return function (e) {
+    PDFViewerApplication.cropResizing = true;
+    PDFViewerApplication.cropResizingDirection = resizeDir;
+    // e.stopPropagation();
+  };
+}
+
+function handleCropMouseUp(e) {
+  PDFViewerApplication.cropResizing = false;
+  PDFViewerApplication.cropResizingDirection = null;
+  // e.stopPropagation();
+}
+
+function handleCropMouseMove(e) {
+  if (PDFViewerApplication.cropResizing && PDFViewerApplication.cropMode) {
+    resizeCropOverlay(e.clientX, e.clientY);
+  }
+}
+
 function createCropOverlay() {
+  if (document.getElementById("crop-overlay")) {
+    return null;
+  }
+
   const cropOverlay = document.createElement("div");
   cropOverlay.id = "crop-overlay";
   cropOverlay.style.position = "absolute";
@@ -2475,50 +2539,37 @@ function createCropOverlay() {
   cropOverlay.style.width = "100%";
   cropOverlay.style.height = "100%";
   cropOverlay.style.zIndex = "1000";
+
   // Add the handles to the overlay
   const cropLeft = document.createElement("div");
   cropLeft.id = "crop-left-handle";
-  cropLeft.style.position = "absolute";
-  cropLeft.style.top = "0";
-  cropLeft.style.left = "0";
-  cropLeft.style.width = "10px";
-  cropLeft.style.height = "100%";
-  cropLeft.style.backgroundColor = "rgba(0, 0, 0, 0.5)";
-  cropLeft.style.cursor = "col-resize";
+  cropLeft.classList.add("crop-resize-handle");
   cropOverlay.appendChild(cropLeft);
 
   const cropRight = document.createElement("div");
   cropRight.id = "crop-right-handle";
-  cropRight.style.position = "absolute";
-  cropRight.style.top = "0";
-  cropRight.style.right = "0";
-  cropRight.style.width = "10px";
-  cropRight.style.height = "100%";
-  cropRight.style.backgroundColor = "rgba(0, 0, 0, 0.5)";
-  cropRight.style.cursor = "col-resize";
+  cropRight.classList.add("crop-resize-handle");
   cropOverlay.appendChild(cropRight);
 
   const cropTop = document.createElement("div");
   cropTop.id = "crop-top-handle";
-  cropTop.style.position = "absolute";
-  cropTop.style.top = "0";
-  cropTop.style.left = "0";
-  cropTop.style.width = "100%";
-  cropTop.style.height = "10px";
-  cropTop.style.backgroundColor = "rgba(0, 0, 0, 0.5)";
-  cropTop.style.cursor = "row-resize";
+  cropTop.classList.add("crop-resize-handle");
   cropOverlay.appendChild(cropTop);
 
   const cropBottom = document.createElement("div");
   cropBottom.id = "crop-bottom-handle";
-  cropBottom.style.position = "absolute";
-  cropBottom.style.bottom = "0";
-  cropBottom.style.left = "0";
-  cropBottom.style.width = "100%";
-  cropBottom.style.height = "10px";
-  cropBottom.style.backgroundColor = "rgba(0, 0, 0, 0.5)";
-  cropBottom.style.cursor = "row-resize";
+  cropBottom.classList.add("crop-resize-handle");
   cropOverlay.appendChild(cropBottom);
+
+  cropLeft.addEventListener("mousedown", handleCropMouseDown("left"));
+  cropRight.addEventListener("mousedown", handleCropMouseDown("right"));
+  cropTop.addEventListener("mousedown", handleCropMouseDown("top"));
+  cropBottom.addEventListener("mousedown", handleCropMouseDown("bottom"));
+
+  document.addEventListener("mouseup", handleCropMouseUp);
+  document.addEventListener("mousemove", handleCropMouseMove);
+
+  return cropOverlay;
 }
 
 function webViewerCrop() {
@@ -2529,67 +2580,13 @@ function webViewerCrop() {
   const pageDiv = document.querySelector(`div.page[data-page-number="${currentPageNumber}"]`);
   const cropOverlay = createCropOverlay();
 
-  // Add the overlay to the page
-  pageDiv.appendChild(cropOverlay);
+  if (cropOverlay) {
+    // Add the overlay to the page
+    pageDiv.appendChild(cropOverlay);
+  }
 
   // TODO: The parts below should be moved to some init function
 
-  // Function to update the overlay's size
-  function resizeOverlay(mouseX, mouseY) {
-    const cropOverlay = document.getElementById('crop-overlay');
-    const scrollY = window.scrollY;
-    // const rect = cropOverlay.getBoundingClientRect();
-
-    if (PDFViewerApplication.cropResizingDirection === 'left') {
-      const oldWidth = parseInt(cropOverlay.style.width.replace('px', ''));
-      const oldLeft = parseInt(cropOverlay.style.left.replace('px', ''));
-      const newWidth = oldWidth + (oldLeft - mouseX);
-      if (newWidth > 0) {
-        cropOverlay.style.width = newWidth + 'px';
-        cropOverlay.style.left = mouseX + 'px';
-      }
-    }
-    else if (PDFViewerApplication.cropResizingDirection === 'right') {
-      const newWidth = mouseX - parseInt(cropOverlay.style.left.replace('px', ''));
-      if (newWidth > 0) {
-        cropOverlay.style.width = newWidth + 'px';
-      }
-    }
-    else if (PDFViewerApplication.cropResizingDirection === 'top') {
-      const oldHeight = parseInt(cropOverlay.style.height.replace('px', ''));
-      const oldTop = parseInt(cropOverlay.style.top.replace('px', ''));
-      const newHeight = oldHeight + (oldTop - (mouseY + scrollY));
-      if (newHeight > 0) {
-        cropOverlay.style.height = newHeight + 'px';
-        cropOverlay.style.top = (mouseY + scrollY) + 'px';
-      }
-    }
-    else if (PDFViewerApplication.resizeDirection === 'bottom') {
-      const newHeight = (mouseY + scrollY) - parseInt(cropOverlay.style.top.replace('px', ''));
-      if (newHeight > 0) {
-        cropOverlay.style.height = newHeight + 'px';
-      }
-    }
-  }
-
-  function handleMouseDown(resizeDir) {
-    return function (e) {
-      PDFViewerApplication.cropResizing = true;
-      PDFViewerApplication.cropResizingDirection = resizeDir;
-      e.stopPropagation();
-    };
-  }
-
-  function handleMouseUp(e) {
-    PDFViewerApplication.cropResizing = false;
-    PDFViewerApplication.cropResizingDirection = null;
-    e.stopPropagation();
-  }
-
-  function handleMouseMove(e) {
-    if (PDFViewerApplication.cropResizing && PDFViewerApplication.cropMode) {
-    }
-  }
 
   // const cropBox = page.getCropBox();
   // const mediaBox = page.getMediaBox();
@@ -2627,6 +2624,7 @@ function webViewerCrop() {
   // });
 }
 
+//// ERFAN: This is where my crop code ends
 
 function webViewerDownload() {
   PDFViewerApplication.downloadOrSave();
