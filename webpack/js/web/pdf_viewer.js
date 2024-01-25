@@ -30,7 +30,7 @@
 
 import {
   AnnotationEditorType,
-  AnnotationEditorUIManager,
+  // AnnotationEditorUIManager,
   AnnotationMode,
   PermissionFlag,
   PixelsPerInch,
@@ -67,6 +67,7 @@ import { NullL10n } from "./l10n_utils.js";
 import { PDFPageView } from "./pdf_page_view.js";
 import { PDFRenderingQueue } from "./pdf_rendering_queue.js";
 import { SimpleLinkService } from "./pdf_link_service.js";
+import { AnnotationEditorUIManager } from "./editor/tools.js";
 
 const DEFAULT_CACHE_SIZE = 10;
 
@@ -241,9 +242,9 @@ class PDFViewer {
     const viewerVersion =
       typeof PDFJSDev !== "undefined" ? PDFJSDev.eval("BUNDLE_VERSION") : null;
     if (version !== viewerVersion) {
-      throw new Error(
-        `The API version "${version}" does not match the Viewer version "${viewerVersion}".`
-      );
+      // throw new Error(
+      //   `The API version "${version}" does not match the Viewer version "${viewerVersion}".`
+      // );
     }
     this.container = options.container;
     this.viewer = options.viewer || options.container.firstElementChild;
@@ -1652,9 +1653,9 @@ class PDFViewer {
 
   _getVisiblePages() {
     const views =
-        this._scrollMode === ScrollMode.PAGE
-          ? this.#scrollModePageState.pages
-          : this._pages,
+      this._scrollMode === ScrollMode.PAGE
+        ? this.#scrollModePageState.pages
+        : this._pages,
       horizontal = this._scrollMode === ScrollMode.HORIZONTAL,
       rtl = horizontal && this._isContainerRtl;
 

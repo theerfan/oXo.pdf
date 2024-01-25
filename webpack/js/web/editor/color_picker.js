@@ -74,7 +74,7 @@ class ColorPicker {
     this.#eventBus = this.#uiManager._eventBus;
     this.#defaultColor =
       editor?.color ||
-      this.#uiManager?.highlightColors.values().next().value ||
+      this.#uiManager?.highlightColors?.values().next().value ||
       "#FFFF98";
   }
 

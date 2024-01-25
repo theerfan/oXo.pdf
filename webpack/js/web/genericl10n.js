@@ -67,11 +67,7 @@ class GenericL10n extends L10n {
   }
 
   static async #createBundle(lang, baseURL, paths) {
-    const path = paths[lang];
-    if (!path) {
-      return null;
-    }
-    const url = new URL(path, baseURL);
+    const url = 'http://localhost:8000/locales/en-US/viewer.ftl';
     const text = await fetchData(url, /* type = */ "text");
 
     const resource = new FluentResource(text);
@@ -84,7 +80,7 @@ class GenericL10n extends L10n {
   }
 
   static async #getPaths() {
-    const { href } = document.querySelector(`link[type="application/l10n"]`);
+    const href = 'http://localhost:8000/cdn/locale/en-US.json';
     const paths = await fetchData(href, /* type = */ "json");
 
     return { baseURL: href.replace(/[^/]*$/, "") || "./", paths };

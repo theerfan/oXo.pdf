@@ -77,6 +77,7 @@ import { PDFViewer } from "./pdf_viewer.js";
 import { SecondaryToolbar } from "./secondary_toolbar.js";
 import { Toolbar } from "./toolbar.js";
 import { ViewHistory } from "./view_history.js";
+import { GenericL10n } from "./genericl10n.js";
 
 const FORCE_PAGES_LOADED_TIMEOUT = 10000; // ms
 const WHEEL_ZOOM_DISABLED_TIMEOUT = 1000; // ms
@@ -101,15 +102,17 @@ class DefaultExternalServices {
   static reportTelemetry(data) { }
 
   static createDownloadManager() {
-    throw new Error("Not implemented: createDownloadManager");
+    return {};
+    // throw new Error("Not implemented: createDownloadManager");
   }
 
   static createPreferences() {
-    throw new Error("Not implemented: createPreferences");
+    return {};
+    // throw new Error("Not implemented: createPreferences");
   }
 
   static async createL10n() {
-    throw new Error("Not implemented: createL10n");
+    return new GenericL10n("en-US");
   }
 
   static createScripting() {
@@ -1018,10 +1021,9 @@ const PDFViewerApplication = {
     }
     const loadingTask = getDocument(loadingTaskParams);
     if (this.l10n == null || this.pdfLinkService == null || this.pdfViewer == null || this.pdfThumbnailViewer == null || this.pdfScriptingManager == null) {
-      // this.l10n = await FirefoxExternalServices.createL10n();
       webViewerLoad();
       this.l10n = new GenericL10n("en-US");
-      this._initializeViewerComponents();
+      await this._initializeViewerComponents();
       this.bindEvents();
     }
 
@@ -1910,6 +1912,7 @@ const PDFViewerApplication = {
       webViewerSwitchAnnotationEditorParams
     );
     eventBus._on("print", webViewerPrint);
+    eventBus._on("crop", webViewerCrop);
     eventBus._on("download", webViewerDownload);
     eventBus._on("openinexternalapp", webViewerOpenInExternalApp);
     eventBus._on("firstpage", webViewerFirstPage);
@@ -2461,6 +2464,169 @@ function webViewerSwitchAnnotationEditorParams(evt) {
 function webViewerPrint() {
   PDFViewerApplication.triggerPrinting();
 }
+
+function createCropOverlay() {
+  const cropOverlay = document.createElement("div");
+  cropOverlay.id = "crop-overlay";
+  cropOverlay.style.position = "absolute";
+  cropOverlay.style.top = "0";
+  cropOverlay.style.left = "0";
+  cropOverlay.style.width = "100%";
+  cropOverlay.style.height = "100%";
+  cropOverlay.style.zIndex = "1000";
+  // Add the handles to the overlay
+  const cropLeft = document.createElement("div");
+  cropLeft.id = "crop-left-handle";
+  cropLeft.style.position = "absolute";
+  cropLeft.style.top = "0";
+  cropLeft.style.left = "0";
+  cropLeft.style.width = "10px";
+  cropLeft.style.height = "100%";
+  cropLeft.style.backgroundColor = "rgba(0, 0, 0, 0.5)";
+  cropLeft.style.cursor = "col-resize";
+  cropOverlay.appendChild(cropLeft);
+
+  const cropRight = document.createElement("div");
+  cropRight.id = "crop-right-handle";
+  cropRight.style.position = "absolute";
+  cropRight.style.top = "0";
+  cropRight.style.right = "0";
+  cropRight.style.width = "10px";
+  cropRight.style.height = "100%";
+  cropRight.style.backgroundColor = "rgba(0, 0, 0, 0.5)";
+  cropRight.style.cursor = "col-resize";
+  cropOverlay.appendChild(cropRight);
+
+  const cropTop = document.createElement("div");
+  cropTop.id = "crop-top-handle";
+  cropTop.style.position = "absolute";
+  cropTop.style.top = "0";
+  cropTop.style.left = "0";
+  cropTop.style.width = "100%";
+  cropTop.style.height = "10px";
+  cropTop.style.backgroundColor = "rgba(0, 0, 0, 0.5)";
+  cropTop.style.cursor = "row-resize";
+  cropOverlay.appendChild(cropTop);
+
+  const cropBottom = document.createElement("div");
+  cropBottom.id = "crop-bottom-handle";
+  cropBottom.style.position = "absolute";
+  cropBottom.style.bottom = "0";
+  cropBottom.style.left = "0";
+  cropBottom.style.width = "100%";
+  cropBottom.style.height = "10px";
+  cropBottom.style.backgroundColor = "rgba(0, 0, 0, 0.5)";
+  cropBottom.style.cursor = "row-resize";
+  cropOverlay.appendChild(cropBottom);
+}
+
+function webViewerCrop() {
+  const currentPageNumber = PDFViewerApplication.pdfViewer.currentPageNumber;
+  const page = PDFViewerApplication.pdfDoc.getPages()[currentPageNumber - 1];
+
+  // get the div with class="page" and data-page-number=current page number
+  const pageDiv = document.querySelector(`div.page[data-page-number="${currentPageNumber}"]`);
+  const cropOverlay = createCropOverlay();
+
+  // Add the overlay to the page
+  pageDiv.appendChild(cropOverlay);
+
+  // TODO: The parts below should be moved to some init function
+
+  // Function to update the overlay's size
+  function resizeOverlay(mouseX, mouseY) {
+    const cropOverlay = document.getElementById('crop-overlay');
+    const scrollY = window.scrollY;
+    // const rect = cropOverlay.getBoundingClientRect();
+
+    if (PDFViewerApplication.cropResizingDirection === 'left') {
+      const oldWidth = parseInt(cropOverlay.style.width.replace('px', ''));
+      const oldLeft = parseInt(cropOverlay.style.left.replace('px', ''));
+      const newWidth = oldWidth + (oldLeft - mouseX);
+      if (newWidth > 0) {
+        cropOverlay.style.width = newWidth + 'px';
+        cropOverlay.style.left = mouseX + 'px';
+      }
+    }
+    else if (PDFViewerApplication.cropResizingDirection === 'right') {
+      const newWidth = mouseX - parseInt(cropOverlay.style.left.replace('px', ''));
+      if (newWidth > 0) {
+        cropOverlay.style.width = newWidth + 'px';
+      }
+    }
+    else if (PDFViewerApplication.cropResizingDirection === 'top') {
+      const oldHeight = parseInt(cropOverlay.style.height.replace('px', ''));
+      const oldTop = parseInt(cropOverlay.style.top.replace('px', ''));
+      const newHeight = oldHeight + (oldTop - (mouseY + scrollY));
+      if (newHeight > 0) {
+        cropOverlay.style.height = newHeight + 'px';
+        cropOverlay.style.top = (mouseY + scrollY) + 'px';
+      }
+    }
+    else if (PDFViewerApplication.resizeDirection === 'bottom') {
+      const newHeight = (mouseY + scrollY) - parseInt(cropOverlay.style.top.replace('px', ''));
+      if (newHeight > 0) {
+        cropOverlay.style.height = newHeight + 'px';
+      }
+    }
+  }
+
+  function handleMouseDown(resizeDir) {
+    return function (e) {
+      PDFViewerApplication.cropResizing = true;
+      PDFViewerApplication.cropResizingDirection = resizeDir;
+      e.stopPropagation();
+    };
+  }
+
+  function handleMouseUp(e) {
+    PDFViewerApplication.cropResizing = false;
+    PDFViewerApplication.cropResizingDirection = null;
+    e.stopPropagation();
+  }
+
+  function handleMouseMove(e) {
+    if (PDFViewerApplication.cropResizing && PDFViewerApplication.cropMode) {
+    }
+  }
+
+  // const cropBox = page.getCropBox();
+  // const mediaBox = page.getMediaBox();
+  // const cropWidth = cropBox[2] - cropBox[0];
+  // const cropHeight = cropBox[3] - cropBox[1];
+  // const mediaWidth = mediaBox[2] - mediaBox[0];
+  // const mediaHeight = mediaBox[3] - mediaBox[1];
+  // const offsetX = (mediaWidth - cropWidth) / 2;
+  // const offsetY = (mediaHeight - cropHeight) / 2;
+  // const transform = [
+  //   1,
+  //   0,
+  //   0,
+  //   1,
+  //   -1 * cropBox[0] + offsetX,
+  //   -1 * cropBox[1] + offsetY
+  // ];
+  // const newViewport = page.getViewport({
+  //   transform,
+  //   dontFlip: true
+  // });
+  // PDFViewerApplication.pdfViewer.currentScaleValue = PDFViewerApplication.pdfViewer.currentScaleValue;
+  // PDFViewerApplication.pdfViewer.scrollPageIntoView({
+  //   pageNumber: currentPageNumber,
+  //   destArray: [
+  //     null,
+  //     {
+  //       name: "XYZ"
+  //     },
+  //     newViewport[0] + newViewport[2] / 2,
+  //     newViewport[1] + newViewport[3] / 2,
+  //     0
+  //   ],
+  //   allowNegativeOffset: true
+  // });
+}
+
+
 function webViewerDownload() {
   PDFViewerApplication.downloadOrSave();
 }
@@ -3248,6 +3414,157 @@ const PDFPrintServiceFactory = {
     },
   },
 };
+
+function getViewerConfiguration() {
+  return {
+    appContainer: document.body,
+    mainContainer: document.getElementById("viewerContainer"),
+    viewerContainer: document.getElementById("viewer"),
+    toolbar: {
+      container: document.getElementById("toolbarViewer"),
+      numPages: document.getElementById("numPages"),
+      pageNumber: document.getElementById("pageNumber"),
+      scaleSelect: document.getElementById("scaleSelect"),
+      customScaleOption: document.getElementById("customScaleOption"),
+      previous: document.getElementById("previous"),
+      next: document.getElementById("next"),
+      zoomIn: document.getElementById("zoomIn"),
+      zoomOut: document.getElementById("zoomOut"),
+      viewFind: document.getElementById("viewFind"),
+      print: document.getElementById("print"),
+      editorFreeTextButton: document.getElementById("editorFreeText"),
+      editorFreeTextParamsToolbar: document.getElementById(
+        "editorFreeTextParamsToolbar"
+      ),
+      editorHighlightButton: document.getElementById("editorHighlight"),
+      editorHighlightParamsToolbar: document.getElementById(
+        "editorHighlightParamsToolbar"
+      ),
+      editorHighlightColorPicker: document.getElementById(
+        "editorHighlightColorPicker"
+      ),
+      editorInkButton: document.getElementById("editorInk"),
+      editorInkParamsToolbar: document.getElementById("editorInkParamsToolbar"),
+      editorStampButton: document.getElementById("editorStamp"),
+      editorStampParamsToolbar: document.getElementById(
+        "editorStampParamsToolbar"
+      ),
+      download: document.getElementById("download"),
+    },
+    secondaryToolbar: {
+      toolbar: document.getElementById("secondaryToolbar"),
+      toggleButton: document.getElementById("secondaryToolbarToggle"),
+      presentationModeButton: document.getElementById("presentationMode"),
+      openFileButton:
+        typeof PDFJSDev === "undefined" || PDFJSDev.test("GENERIC")
+          ? document.getElementById("secondaryOpenFile")
+          : null,
+      printButton: document.getElementById("secondaryPrint"),
+      downloadButton: document.getElementById("secondaryDownload"),
+      viewBookmarkButton: document.getElementById("viewBookmark"),
+      firstPageButton: document.getElementById("firstPage"),
+      lastPageButton: document.getElementById("lastPage"),
+      pageRotateCwButton: document.getElementById("pageRotateCw"),
+      pageRotateCcwButton: document.getElementById("pageRotateCcw"),
+      cursorSelectToolButton: document.getElementById("cursorSelectTool"),
+      cursorHandToolButton: document.getElementById("cursorHandTool"),
+      scrollPageButton: document.getElementById("scrollPage"),
+      scrollVerticalButton: document.getElementById("scrollVertical"),
+      scrollHorizontalButton: document.getElementById("scrollHorizontal"),
+      scrollWrappedButton: document.getElementById("scrollWrapped"),
+      spreadNoneButton: document.getElementById("spreadNone"),
+      spreadOddButton: document.getElementById("spreadOdd"),
+      spreadEvenButton: document.getElementById("spreadEven"),
+      documentPropertiesButton: document.getElementById("documentProperties"),
+    },
+    sidebar: {
+      // Divs (and sidebar button)
+      outerContainer: document.getElementById("outerContainer"),
+      sidebarContainer: document.getElementById("sidebarContainer"),
+      toggleButton: document.getElementById("sidebarToggle"),
+      resizer: document.getElementById("sidebarResizer"),
+      // Buttons
+      thumbnailButton: document.getElementById("viewThumbnail"),
+      outlineButton: document.getElementById("viewOutline"),
+      attachmentsButton: document.getElementById("viewAttachments"),
+      layersButton: document.getElementById("viewLayers"),
+      // Views
+      thumbnailView: document.getElementById("thumbnailView"),
+      outlineView: document.getElementById("outlineView"),
+      attachmentsView: document.getElementById("attachmentsView"),
+      layersView: document.getElementById("layersView"),
+      // View-specific options
+      currentOutlineItemButton: document.getElementById("currentOutlineItem"),
+    },
+    findBar: {
+      bar: document.getElementById("findbar"),
+      toggleButton: document.getElementById("viewFind"),
+      findField: document.getElementById("findInput"),
+      highlightAllCheckbox: document.getElementById("findHighlightAll"),
+      caseSensitiveCheckbox: document.getElementById("findMatchCase"),
+      matchDiacriticsCheckbox: document.getElementById("findMatchDiacritics"),
+      entireWordCheckbox: document.getElementById("findEntireWord"),
+      findMsg: document.getElementById("findMsg"),
+      findResultsCount: document.getElementById("findResultsCount"),
+      findPreviousButton: document.getElementById("findPrevious"),
+      findNextButton: document.getElementById("findNext"),
+    },
+    passwordOverlay: {
+      dialog: document.getElementById("passwordDialog"),
+      label: document.getElementById("passwordText"),
+      input: document.getElementById("password"),
+      submitButton: document.getElementById("passwordSubmit"),
+      cancelButton: document.getElementById("passwordCancel"),
+    },
+    documentProperties: {
+      dialog: document.getElementById("documentPropertiesDialog"),
+      closeButton: document.getElementById("documentPropertiesClose"),
+      fields: {
+        fileName: document.getElementById("fileNameField"),
+        fileSize: document.getElementById("fileSizeField"),
+        title: document.getElementById("titleField"),
+        author: document.getElementById("authorField"),
+        subject: document.getElementById("subjectField"),
+        keywords: document.getElementById("keywordsField"),
+        creationDate: document.getElementById("creationDateField"),
+        modificationDate: document.getElementById("modificationDateField"),
+        creator: document.getElementById("creatorField"),
+        producer: document.getElementById("producerField"),
+        version: document.getElementById("versionField"),
+        pageCount: document.getElementById("pageCountField"),
+        pageSize: document.getElementById("pageSizeField"),
+        linearized: document.getElementById("linearizedField"),
+      },
+    },
+    altTextDialog: {
+      dialog: document.getElementById("altTextDialog"),
+      optionDescription: document.getElementById("descriptionButton"),
+      optionDecorative: document.getElementById("decorativeButton"),
+      textarea: document.getElementById("descriptionTextarea"),
+      cancelButton: document.getElementById("altTextCancel"),
+      saveButton: document.getElementById("altTextSave"),
+    },
+    annotationEditorParams: {
+      editorFreeTextFontSize: document.getElementById("editorFreeTextFontSize"),
+      editorFreeTextColor: document.getElementById("editorFreeTextColor"),
+      editorInkColor: document.getElementById("editorInkColor"),
+      editorInkThickness: document.getElementById("editorInkThickness"),
+      editorInkOpacity: document.getElementById("editorInkOpacity"),
+      editorStampAddImage: document.getElementById("editorStampAddImage"),
+    },
+    printContainer: document.getElementById("printContainer"),
+    openFileInput:
+      typeof PDFJSDev === "undefined" || PDFJSDev.test("GENERIC")
+        ? document.getElementById("fileInput")
+        : null,
+    debuggerScriptPath: "./debugger.mjs",
+  };
+}
+
+function webViewerLoad() {
+  const config = getViewerConfiguration();
+  PDFViewerApplication.run(config);
+}
 
 export {
   DefaultExternalServices,

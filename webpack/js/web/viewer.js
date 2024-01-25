@@ -13,8 +13,10 @@
  * limitations under the License.
  */
 
-import "web-com";
-import "web-print_service";
+import "./genericcom.js";
+import "./pdf_print_service.js";
+// import "web-com";
+// import "web-print_service";
 import { RenderingStates, ScrollMode, SpreadMode } from "./ui_utils.js";
 import { AppOptions } from "./app_options.js";
 import { LinkTarget } from "./pdf_link_service.js";
