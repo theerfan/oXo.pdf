@@ -2470,75 +2470,85 @@ function webViewerPrint() {
 //// ERFAN: this is the start of my crop code.
 
 
-// Function to update the overlay's size
-function resizeCropOverlay(mouseX, mouseY) {
+// Function to initialize drag functionality
+function initializeDrag() {
   const cropOverlay = document.getElementById('crop-overlay');
-  const scrollY = window.scrollY;
-  // const rect = cropOverlay.getBoundingClientRect();
-
-
-  if (PDFViewerApplication.cropResizingDirection=== 'left') {
-      const oldWidth = parseInt(cropOverlay.style.width.replace('px', ''));
-      const oldLeft = parseInt(cropOverlay.style.left.replace('px', ''));
-      const newWidth = oldWidth + (oldLeft - mouseX);
-      if (newWidth > 0) {
-          cropOverlay.style.width = newWidth + 'px';
-          cropOverlay.style.left = mouseX + 'px';
-      }
-  }
-  else if (PDFViewerApplication.cropResizingDirection=== 'right') {
-      const newWidth = mouseX - parseInt(cropOverlay.style.left.replace('px', ''));
-      if (newWidth > 0) {
-          cropOverlay.style.width = newWidth + 'px';
-      }
-  }
-  else if (PDFViewerApplication.cropResizingDirection=== 'top') {
-      const oldHeight = parseInt(cropOverlay.style.height.replace('px', ''));
-      const oldTop = parseInt(cropOverlay.style.top.replace('px', ''));
-      const newHeight = oldHeight + (oldTop - (mouseY + scrollY));
-      if (newHeight > 0) {
-          cropOverlay.style.height = newHeight + 'px';
-          cropOverlay.style.top = (mouseY + scrollY) + 'px';
-      }
-  }
-  else if (PDFViewerApplication.cropResizingDirection === 'bottom') {
-      const newHeight = (mouseY + scrollY) - parseInt(cropOverlay.style.top.replace('px', ''));
-      if (newHeight > 0) {
-          cropOverlay.style.height = newHeight + 'px';
-      }
-  }
-}
-
-
-
-
-function handleMouseDown(resizeDir) {
-  return function (e) {
-      resizing = true;
-      resizeDirection = resizeDir;
-      e.stopPropagation();
+  const handles = {
+    left: document.getElementById('crop-left-handle'),
+    right: document.getElementById('crop-right-handle'),
+    top: document.getElementById('crop-top-handle'),
+    bottom: document.getElementById('crop-bottom-handle')
   };
-}
 
-function handleCropMouseDown(resizeDir) {
-  return function (e) {
-    PDFViewerApplication.cropResizing = true;
-    PDFViewerApplication.cropResizingDirection = resizeDir;
-    // e.stopPropagation();
-  };
-}
+  let startingMouseX, startingMouseY, startWidth, startHeight;
 
-function handleCropMouseUp(e) {
-  PDFViewerApplication.cropResizing = false;
-  PDFViewerApplication.cropResizingDirection = null;
-  // e.stopPropagation();
-}
+  // Function to start the resizing
+  function initDrag(e, handle) {
+    startingMouseX = e.clientX;
+    startingMouseY = e.clientY;
+    startWidth = parseInt(document.defaultView.getComputedStyle(cropOverlay).width, 10);
+    startHeight = parseInt(document.defaultView.getComputedStyle(cropOverlay).height, 10);
 
-function handleCropMouseMove(e) {
-  if (PDFViewerApplication.cropResizing && PDFViewerApplication.cropMode) {
-    resizeCropOverlay(e.clientX, e.clientY);
+    // Capture the initial left and top positions
+    const rect = cropOverlay.getBoundingClientRect();
+    var initialLeft;
+    if (cropOverlay.offsetLeft === "0px") {
+      initialLeft = rect.left + window.scrollX;
+    }
+    else {
+      initialLeft = parseInt(cropOverlay.offsetLeft, 10);
+    }
+
+    document.documentElement.addEventListener('mousemove', doDrag, false);
+    document.documentElement.addEventListener('mouseup', stopDrag, false);
+
+    function doDrag(e) {
+      let newWidth, newHeight, newLeft, newTop;
+      switch (handle) {
+        case 'left':
+          newWidth = startWidth + (startingMouseX - e.clientX);
+          newLeft = initialLeft - (startingMouseX - e.clientX);
+          if (newWidth > 0) {
+            cropOverlay.style.width = newWidth + 'px';
+            cropOverlay.style.left = newLeft + 'px';
+          }
+          break;
+        case 'right':
+          newWidth = startWidth + (e.clientX - startingMouseX);
+          if (newWidth > 0) {
+            cropOverlay.style.width = newWidth + 'px';
+          }
+          break;
+        case 'top':
+          newHeight = startHeight + (startingMouseY - e.clientY);
+          if (newHeight > 0) {
+            cropOverlay.style.height = newHeight + 'px';
+            cropOverlay.style.top = e.clientY + 'px';
+          }
+          break;
+        case 'bottom':
+          newHeight = startHeight + (e.clientY - startingMouseY);
+          if (newHeight > 0) {
+            cropOverlay.style.height = newHeight + 'px';
+          }
+          break;
+      }
+    }
+
+    function stopDrag() {
+      document.documentElement.removeEventListener('mousemove', doDrag, false);
+      document.documentElement.removeEventListener('mouseup', stopDrag, false);
+    }
   }
+
+  // Add mousedown event listeners to each handle
+  Object.keys(handles).forEach(handle => {
+    handles[handle].addEventListener('mousedown', function (e) {
+      initDrag(e, handle);
+    }, false);
+  });
 }
+
 
 function createCropOverlay() {
   if (document.getElementById("crop-overlay")) {
@@ -2575,13 +2585,6 @@ function createCropOverlay() {
   cropBottom.classList.add("crop-resize-handle");
   cropOverlay.appendChild(cropBottom);
 
-  cropLeft.addEventListener("mousedown", handleCropMouseDown("left"));
-  cropRight.addEventListener("mousedown", handleCropMouseDown("right"));
-  cropTop.addEventListener("mousedown", handleCropMouseDown("top"));
-  cropBottom.addEventListener("mousedown", handleCropMouseDown("bottom"));
-
-  document.addEventListener("mouseup", handleCropMouseUp);
-  document.addEventListener("mousemove", handleCropMouseMove);
 
   return cropOverlay;
 }
@@ -2599,6 +2602,9 @@ function webViewerCrop() {
     // Add the overlay to the page
     pageDiv.appendChild(cropOverlay);
   }
+
+  initializeDrag();
+
 
   // TODO: The parts below should be moved to some init function
 
