@@ -129,6 +129,7 @@ class DefaultExternalServices {
   }
 }
 
+
 const PDFViewerApplication = {
   initialBookmark: document.location.hash.substring(1),
   _initializedCapability: new PromiseCapability(),
@@ -2468,42 +2469,55 @@ function webViewerPrint() {
 
 //// ERFAN: this is the start of my crop code.
 
+
 // Function to update the overlay's size
 function resizeCropOverlay(mouseX, mouseY) {
   const cropOverlay = document.getElementById('crop-overlay');
   const scrollY = window.scrollY;
   // const rect = cropOverlay.getBoundingClientRect();
 
-  if (PDFViewerApplication.cropResizingDirection === 'left') {
-    const oldWidth = parseInt(cropOverlay.style.width.replace('px', ''));
-    const oldLeft = parseInt(cropOverlay.style.left.replace('px', ''));
-    const newWidth = oldWidth + (oldLeft - mouseX);
-    if (newWidth > 0) {
-      cropOverlay.style.width = newWidth + 'px';
-      cropOverlay.style.left = mouseX + 'px';
-    }
+
+  if (PDFViewerApplication.cropResizingDirection=== 'left') {
+      const oldWidth = parseInt(cropOverlay.style.width.replace('px', ''));
+      const oldLeft = parseInt(cropOverlay.style.left.replace('px', ''));
+      const newWidth = oldWidth + (oldLeft - mouseX);
+      if (newWidth > 0) {
+          cropOverlay.style.width = newWidth + 'px';
+          cropOverlay.style.left = mouseX + 'px';
+      }
   }
-  else if (PDFViewerApplication.cropResizingDirection === 'right') {
-    const newWidth = mouseX - parseInt(cropOverlay.style.left.replace('px', ''));
-    if (newWidth > 0) {
-      cropOverlay.style.width = newWidth + 'px';
-    }
+  else if (PDFViewerApplication.cropResizingDirection=== 'right') {
+      const newWidth = mouseX - parseInt(cropOverlay.style.left.replace('px', ''));
+      if (newWidth > 0) {
+          cropOverlay.style.width = newWidth + 'px';
+      }
   }
-  else if (PDFViewerApplication.cropResizingDirection === 'top') {
-    const oldHeight = parseInt(cropOverlay.style.height.replace('px', ''));
-    const oldTop = parseInt(cropOverlay.style.top.replace('px', ''));
-    const newHeight = oldHeight + (oldTop - (mouseY + scrollY));
-    if (newHeight > 0) {
-      cropOverlay.style.height = newHeight + 'px';
-      cropOverlay.style.top = (mouseY + scrollY) + 'px';
-    }
+  else if (PDFViewerApplication.cropResizingDirection=== 'top') {
+      const oldHeight = parseInt(cropOverlay.style.height.replace('px', ''));
+      const oldTop = parseInt(cropOverlay.style.top.replace('px', ''));
+      const newHeight = oldHeight + (oldTop - (mouseY + scrollY));
+      if (newHeight > 0) {
+          cropOverlay.style.height = newHeight + 'px';
+          cropOverlay.style.top = (mouseY + scrollY) + 'px';
+      }
   }
-  else if (PDFViewerApplication.resizeDirection === 'bottom') {
-    const newHeight = (mouseY + scrollY) - parseInt(cropOverlay.style.top.replace('px', ''));
-    if (newHeight > 0) {
-      cropOverlay.style.height = newHeight + 'px';
-    }
+  else if (PDFViewerApplication.cropResizingDirection === 'bottom') {
+      const newHeight = (mouseY + scrollY) - parseInt(cropOverlay.style.top.replace('px', ''));
+      if (newHeight > 0) {
+          cropOverlay.style.height = newHeight + 'px';
+      }
   }
+}
+
+
+
+
+function handleMouseDown(resizeDir) {
+  return function (e) {
+      resizing = true;
+      resizeDirection = resizeDir;
+      e.stopPropagation();
+  };
 }
 
 function handleCropMouseDown(resizeDir) {
@@ -2573,6 +2587,7 @@ function createCropOverlay() {
 }
 
 function webViewerCrop() {
+  PDFViewerApplication.cropMode = true;
   const currentPageNumber = PDFViewerApplication.pdfViewer.currentPageNumber;
   const page = PDFViewerApplication.pdfDoc.getPages()[currentPageNumber - 1];
 
