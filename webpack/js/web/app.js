@@ -2470,15 +2470,30 @@ function webViewerPrint() {
 //// ERFAN: this is the start of my crop code.
 
 
-// Function to initialize drag functionality
-function initializeDrag() {
-  const cropOverlay = document.getElementById('crop-overlay');
-  const handles = {
+function getCropHandles() {
+  return {
     left: document.getElementById('crop-left-handle'),
     right: document.getElementById('crop-right-handle'),
     top: document.getElementById('crop-top-handle'),
     bottom: document.getElementById('crop-bottom-handle')
   };
+}
+
+function getCropHandleRects() {
+  const handles = getCropHandles();
+  return {
+    left: handles.left.getBoundingClientRect(),
+    right: handles.right.getBoundingClientRect(),
+    top: handles.top.getBoundingClientRect(),
+    bottom: handles.bottom.getBoundingClientRect()
+  };
+}
+
+
+// Function to initialize drag functionality
+function initializeDrag() {
+  const cropOverlay = document.getElementById('crop-overlay');
+  const handles = getCropHandles();
 
   let startingMouseX, startingMouseY, startWidth, startHeight;
 
@@ -2503,6 +2518,7 @@ function initializeDrag() {
     document.documentElement.addEventListener('mouseup', stopDrag, false);
 
     function doDrag(e) {
+      e.preventDefault();
       let newWidth, newHeight, newLeft, newTop;
       switch (handle) {
         case 'left':
@@ -2585,14 +2601,66 @@ function createCropOverlay() {
   cropBottom.classList.add("crop-resize-handle");
   cropOverlay.appendChild(cropBottom);
 
+  const cropConfirmButton = document.createElement("button");
+  cropConfirmButton.id = "crop-confirm-button";
+  cropConfirmButton.style.position = "absolute";
+  cropConfirmButton.style.bottom = "10px";
+  cropConfirmButton.style.right = "10px";
+  cropConfirmButton.style.zIndex = "1001";
+  cropConfirmButton.innerText = "Confirm Crop";
+  cropConfirmButton.addEventListener("click", confirmCrop);
+  cropOverlay.appendChild(cropConfirmButton);
 
   return cropOverlay;
 }
 
-function webViewerCrop() {
-  PDFViewerApplication.cropMode = true;
+async function confirmCrop() {
   const currentPageNumber = PDFViewerApplication.pdfViewer.currentPageNumber;
-  const page = PDFViewerApplication.pdfDoc.getPages()[currentPageNumber - 1];
+  const currentPageDiv = document.querySelector(`div.page[data-page-number="${currentPageNumber}"]`);
+  const pageRect = currentPageDiv.getBoundingClientRect();
+
+  // PDFViewerApplication.pdfDoc is the loaded PDFLib document
+  const libPdfDoc = PDFViewerApplication.pdfDoc;
+  const jsPdfDoc = await PDFViewerApplication.pdfDocument;
+
+  const handleRects = getCropHandleRects();
+
+  // Get the current page
+  const pdfLibPage = libPdfDoc.getPages()[currentPageNumber - 1];
+  const initialCropBox = pdfLibPage.getCropBox();
+
+  // Calculate the scale factor between the displayed page and the original PDF page size
+  const scaleX = initialCropBox.width / pageRect.width;
+  const scaleY = initialCropBox.height / pageRect.height;
+
+
+  // Calculate the crop box dimensions based on the overlay's position and size
+  const cropBox = {
+    x: handleRects.left.left - pageRect.left,
+    y: pageRect.bottom - handleRects.bottom.bottom,
+    width: (handleRects.right.left - (handleRects.left.left + handleRects.left.width)) * scaleX,
+    height: (handleRects.bottom.top - handleRects.top.top) * scaleY
+  };
+
+
+  console.log(cropBox);
+
+  // Set the crop box for the current page (this part depends on how your PDF library handles cropping)
+  pdfLibPage.setCropBox(cropBox.x, cropBox.y, cropBox.width, cropBox.height); // This is an example, actual implementation may vary
+
+  const pdfBytes = await libPdfDoc.save();
+
+  PDFViewerApplication.open({
+    data: pdfBytes,
+  });
+
+  currentPageDiv.scrollIntoView({ behavior: 'smooth' });
+
+}
+
+
+function webViewerCrop() {
+  const currentPageNumber = PDFViewerApplication.pdfViewer.currentPageNumber;
 
   // get the div with class="page" and data-page-number=current page number
   const pageDiv = document.querySelector(`div.page[data-page-number="${currentPageNumber}"]`);
