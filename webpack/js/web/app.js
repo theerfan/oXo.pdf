@@ -2650,6 +2650,8 @@ async function confirmCrop() {
 
   const pdfBytes = await libPdfDoc.save();
 
+  PDFViewerApplication.
+
   PDFViewerApplication.open({
     data: pdfBytes,
   });

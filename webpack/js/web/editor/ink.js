@@ -74,6 +74,7 @@ class InkEditor extends AnnotationEditor {
     this.opacity = params.opacity || null;
     this.paths = [];
     this.bezierPath2D = [];
+    // For some reason this allrawpaths is never used!
     this.allRawPaths = [];
     this.currentPath = [];
     this.scaleFactor = 1;
