@@ -2646,7 +2646,7 @@ async function confirmCrop() {
   console.log(cropBox);
 
   // Set the crop box for the current page (this part depends on how your PDF library handles cropping)
-  pdfLibPage.setCropBox(cropBox.x, cropBox.y, cropBox.width, cropBox.height); // This is an example, actual implementation may vary
+  pdfLibPage.setCropBox(cropBox.x, cropBox.y, cropBox.width, cropBox.height); 
 
   const pdfBytes = await libPdfDoc.save();
 
@@ -2674,45 +2674,6 @@ function webViewerCrop() {
   }
 
   initializeDrag();
-
-
-  // TODO: The parts below should be moved to some init function
-
-
-  // const cropBox = page.getCropBox();
-  // const mediaBox = page.getMediaBox();
-  // const cropWidth = cropBox[2] - cropBox[0];
-  // const cropHeight = cropBox[3] - cropBox[1];
-  // const mediaWidth = mediaBox[2] - mediaBox[0];
-  // const mediaHeight = mediaBox[3] - mediaBox[1];
-  // const offsetX = (mediaWidth - cropWidth) / 2;
-  // const offsetY = (mediaHeight - cropHeight) / 2;
-  // const transform = [
-  //   1,
-  //   0,
-  //   0,
-  //   1,
-  //   -1 * cropBox[0] + offsetX,
-  //   -1 * cropBox[1] + offsetY
-  // ];
-  // const newViewport = page.getViewport({
-  //   transform,
-  //   dontFlip: true
-  // });
-  // PDFViewerApplication.pdfViewer.currentScaleValue = PDFViewerApplication.pdfViewer.currentScaleValue;
-  // PDFViewerApplication.pdfViewer.scrollPageIntoView({
-  //   pageNumber: currentPageNumber,
-  //   destArray: [
-  //     null,
-  //     {
-  //       name: "XYZ"
-  //     },
-  //     newViewport[0] + newViewport[2] / 2,
-  //     newViewport[1] + newViewport[3] / 2,
-  //     0
-  //   ],
-  //   allowNegativeOffset: true
-  // });
 }
 
 //// ERFAN: This is where my crop code ends
