@@ -13,7 +13,8 @@
  * limitations under the License.
  */
 
-import { DOMSVGFactory, shadow } from "../pdf.mjs";
+import { DOMSVGFactory } from "./display_utils.js";
+import { shadow } from "./util.js";
 
 class AltTextManager {
   #boundUpdateUIState = this.#updateUIState.bind(this);

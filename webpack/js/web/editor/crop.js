@@ -197,6 +197,9 @@ class CropEditor extends AnnotationEditor {
   }
 
   async confirmCrop() {
+    if (this.PDFViewerApplication === null) {
+      this.PDFViewerApplication = window.PDFViewerApplication;
+    }
     const currentPageNumber = this.PDFViewerApplication.pdfViewer.currentPageNumber;
     const currentPageDiv = document.querySelector(`div.page[data-page-number="${currentPageNumber}"]`);
     const pageRect = currentPageDiv.getBoundingClientRect();
@@ -222,7 +225,6 @@ class CropEditor extends AnnotationEditor {
       width: (handleRects.right.left - (handleRects.left.left + handleRects.left.width)) * scaleX,
       height: (handleRects.bottom.top - handleRects.top.top) * scaleY
     };
-
 
     console.log(cropBox);
 
