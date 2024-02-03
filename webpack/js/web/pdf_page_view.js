@@ -175,6 +175,7 @@ class PDFPageView {
     this.xfaLayer = null;
     this.structTreeLayer = null;
     this.drawLayer = null;
+    this.cropLayer = null;
 
     const div = document.createElement("div");
     div.className = "page";

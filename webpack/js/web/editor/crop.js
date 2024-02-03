@@ -13,62 +13,58 @@
  * limitations under the License.
  */
 
-import {
-  AnnotationEditorParamsType,
-  AnnotationEditorType,
-  Util,
-} from "../util.js";
-import { AnnotationEditor } from "./editor.js";
-import { bindEvents } from "./tools.js";
 
-/**
- * Basic draw editor in order to generate an Highlight annotation.
- */
-class CropEditor extends AnnotationEditor {
-  #id = null;
+class CropEditor {
   #startingMouseX = null;
   #startingMouseY = null;
   #startWidth = null;
   #startHeight = null;
 
-  PDFViewerApplication = window.PDFViewerApplication;
+  #initialLeft = null;
 
-  static _l10nPromise;
+  #lastBottom = null;
+  #lastLeft = null;
+  // #lastWidth = null;
+  // #lastHeight = null;
 
-  static _type = "crop";
+  #initialMismatch = null;
 
-  static _editorType = AnnotationEditorType.CROP;
+  #boundInitDrag = this.initDrag.bind(this);
+  #boundDoDrag = this.doDrag.bind(this);
+  #boundStopDrag = this.stopDrag.bind(this);
+  #boundConfirmCrop = this.confirmCrop.bind(this);
 
   constructor(params) {
-    super({ ...params, name: "cropeditor" });
-    this._isDraggable = false;
-
+    this.createCropOverlay();
     const handles = this.getCropHandles();
 
     // Add mousedown event listeners to each handle
     Object.keys(handles).forEach((handle) => {
       handles[handle].addEventListener(
         "mousedown",
-        function (e) {
-          initDrag(e, handle);
+        (e) => {
+          this.#boundInitDrag(e, handle);
         },
         false
       );
     });
+
+    // Get the initial mismatch between the page and the overlay
+    this.#initialMismatch = this.getInitialMismatch();
+    const [_, __, pageRect] = this.getPageRect(window.PDFViewerApplication);
+    this.#lastBottom = pageRect.bottom;
   }
 
-  static initialize(l10n, uiManager) {
-    AnnotationEditor.initialize(l10n, uiManager);
-  }
-
-  doDrag(e) {
+  doDrag(e, handle) {
     e.preventDefault();
     const cropOverlay = this.getCropOverlay();
+    const [_, __, pageRect] = this.getPageRect(window.PDFViewerApplication);
     let newWidth, newHeight, newLeft, newTop;
     switch (handle) {
       case "left":
         newWidth = this.#startWidth + (this.#startingMouseX - e.clientX);
-        newLeft = initialLeft - (this.#startingMouseX - e.clientX);
+        newLeft = this.#initialLeft - (this.#startingMouseX - e.clientX);
+        this.#lastLeft = e.clientX;
         if (newWidth > 0) {
           cropOverlay.style.width = newWidth + "px";
           cropOverlay.style.left = newLeft + "px";
@@ -84,11 +80,12 @@ class CropEditor extends AnnotationEditor {
         newHeight = this.#startHeight + (this.#startingMouseY - e.clientY);
         if (newHeight > 0) {
           cropOverlay.style.height = newHeight + "px";
-          cropOverlay.style.top = e.clientY + "px";
+          cropOverlay.style.top = (e.clientY - pageRect.top) + "px";
         }
         break;
       case "bottom":
         newHeight = this.#startHeight + (e.clientY - this.#startingMouseY);
+        this.#lastBottom = e.clientY;
         if (newHeight > 0) {
           cropOverlay.style.height = newHeight + "px";
         }
@@ -97,8 +94,8 @@ class CropEditor extends AnnotationEditor {
   }
 
   stopDrag() {
-    document.documentElement.removeEventListener("mousemove", doDrag, false);
-    document.documentElement.removeEventListener("mouseup", stopDrag, false);
+    document.documentElement.removeEventListener("mousemove", this.doDragWithHandle, false);
+    document.documentElement.removeEventListener("mouseup", this.#boundStopDrag, false);
   }
 
   // Function to start the resizing
@@ -117,12 +114,15 @@ class CropEditor extends AnnotationEditor {
 
     // Capture the initial left and top positions
     const rect = cropOverlay.getBoundingClientRect();
-    var initialLeft;
     if (cropOverlay.offsetLeft === "0px") {
-      initialLeft = rect.left + window.scrollX;
+      this.#initialLeft = rect.left + window.scrollX;
     } else {
-      initialLeft = parseInt(cropOverlay.offsetLeft, 10);
+      this.#initialLeft = parseInt(cropOverlay.offsetLeft, 10);
     }
+
+    this.doDragWithHandle = (event) => this.#boundDoDrag(event, handle);
+    document.documentElement.addEventListener('mousemove', this.doDragWithHandle, false);
+    document.documentElement.addEventListener('mouseup', this.#boundStopDrag, false);
   }
 
   getCropOverlay() {
@@ -190,24 +190,63 @@ class CropEditor extends AnnotationEditor {
     cropConfirmButton.style.right = "10px";
     cropConfirmButton.style.zIndex = "1001";
     cropConfirmButton.innerText = "Confirm Crop";
-    cropConfirmButton.addEventListener("click", confirmCrop);
+    cropConfirmButton.addEventListener("click", this.#boundConfirmCrop, false);
     cropOverlay.appendChild(cropConfirmButton);
+
+    const PDFViewerApplication = window.PDFViewerApplication;
+
+    const currentPageNumber = PDFViewerApplication.pdfViewer.currentPageNumber;
+    const pageDiv = document.querySelector(`div.page[data-page-number="${currentPageNumber}"]`);
+    pageDiv.appendChild(cropOverlay);
 
     return cropOverlay;
   }
 
-  async confirmCrop() {
-    if (this.PDFViewerApplication === null) {
-      this.PDFViewerApplication = window.PDFViewerApplication;
-    }
-    const currentPageNumber = this.PDFViewerApplication.pdfViewer.currentPageNumber;
+  hasBeenCroppedAlready(pdfLibPage) {
+    const cropBox = pdfLibPage.getCropBox();
+    const mediaBox = pdfLibPage.getMediaBox();
+    const properties = ["x", "y", "width", "height"];
+    properties.forEach((prop) => {
+      if (cropBox[prop] !== mediaBox[prop]) {
+        return false;
+      }
+    });
+    return true;
+  }
+
+  addDOMRects(rect1, rect2, sign = 1) {
+    const properties = ['left', 'top', 'right', 'bottom', 'width', 'height'];
+    let result = {};
+    properties.forEach(prop => {
+      result[prop] = rect1[prop] + sign * rect2[prop];
+    });
+    return result;
+  }
+
+  getPageRect(PDFViewerApplication) {
+    const currentPageNumber = PDFViewerApplication.pdfViewer.currentPageNumber;
     const currentPageDiv = document.querySelector(`div.page[data-page-number="${currentPageNumber}"]`);
-    const pageRect = currentPageDiv.getBoundingClientRect();
+    return [
+      currentPageNumber,
+      currentPageDiv,
+      currentPageDiv.getBoundingClientRect()
+    ]
+  }
+
+  getInitialMismatch() {
+    const [_, __, pageRect] = this.getPageRect(window.PDFViewerApplication);
+    const cropOverlay = this.getCropOverlay();
+    const overlayRect = cropOverlay.getBoundingClientRect();
+    return this.addDOMRects(pageRect, overlayRect, -1);
+  }
+
+  async confirmCrop() {
+    const PDFViewerApplication = window.PDFViewerApplication;
+
+    const [currentPageNumber, currentPageDiv, pageRect] = this.getPageRect(PDFViewerApplication);
 
     // PDFViewerApplication.pdfDoc is the loaded PDFLib document
-    const libPdfDoc = this.PDFViewerApplication.pdfDoc;
-
-    const handleRects = getCropHandleRects();
+    const libPdfDoc = PDFViewerApplication.pdfDoc;
 
     // Get the current page
     const pdfLibPage = libPdfDoc.getPages()[currentPageNumber - 1];
@@ -217,136 +256,48 @@ class CropEditor extends AnnotationEditor {
     const scaleX = initialCropBox.width / pageRect.width;
     const scaleY = initialCropBox.height / pageRect.height;
 
+    if (this.#lastLeft === null) {
+      this.#lastLeft = initialCropBox.x;
+    }
+    if (this.#lastBottom === null) {
+      this.#lastBottom = pageRect.bottom;
+    }
+
+    const cropOverlayRect = this.getCropOverlay().getBoundingClientRect();
+
 
     // Calculate the crop box dimensions based on the overlay's position and size
     const cropBox = {
-      x: handleRects.left.left - pageRect.left,
-      y: pageRect.bottom - handleRects.bottom.bottom,
-      width: (handleRects.right.left - (handleRects.left.left + handleRects.left.width)) * scaleX,
-      height: (handleRects.bottom.top - handleRects.top.top) * scaleY
+      x: (cropOverlayRect.left + this.#initialMismatch.left - pageRect.left) * scaleX,
+      y: (pageRect.bottom - this.#lastBottom) * scaleY,
+      // x: handleRects.left.left - pageRect.left,
+      // y: pageRect.bottom - handleRects.bottom.bottom,
+      width: (cropOverlayRect.width + this.#initialMismatch.width) * scaleX,
+      height: (cropOverlayRect.height + this.#initialMismatch.height) * scaleY
     };
 
-    console.log(cropBox);
+    // If it has already been cropped, the cropbox and the mediabox aren't the same
+    // and we need to add the initial cropbox values to the new cropbox values
+    if (this.hasBeenCroppedAlready(pdfLibPage)) {
+      cropBox.x += initialCropBox.x;
+      cropBox.y += initialCropBox.y;
+    }
 
     // Set the crop box for the current page (this part depends on how your PDF library handles cropping)
     pdfLibPage.setCropBox(cropBox.x, cropBox.y, cropBox.width, cropBox.height);
 
     const pdfBytes = await libPdfDoc.save();
 
-    this.PDFViewerApplication.open({
+    PDFViewerApplication.open({
       data: pdfBytes,
     });
 
     currentPageDiv.scrollIntoView({ behavior: 'smooth' });
+
+    // Self-destruct the crop editor
+    PDFViewerApplication.CropEditor = null;
   }
 
-  /** @inheritdoc */
-  translateInPage(x, y) { }
-
-  /** @inheritdoc */
-  disableEditing() {
-    super.disableEditing();
-    this.div.classList.toggle("disabled", true);
-  }
-
-  /** @inheritdoc */
-  enableEditing() {
-    super.enableEditing();
-    this.div.classList.toggle("disabled", false);
-  }
-
-  /** @inheritdoc */
-  fixAndSetPosition() {
-    return super.fixAndSetPosition(0);
-  }
-
-  /** @inheritdoc */
-  getRect(tx, ty) {
-    return super.getRect(tx, ty, 0);
-  }
-
-  /** @inheritdoc */
-  onceAdded() {
-    this.parent.addUndoableEditor(this);
-    this.div.focus();
-  }
-
-  /** @inheritdoc */
-  remove() {
-    super.remove();
-  }
-
-  /** @inheritdoc */
-  rebuild() {
-    if (!this.parent) {
-      return;
-    }
-    super.rebuild();
-    if (this.div === null) {
-      return;
-    }
-
-    if (!this.isAttachedToDOM) {
-      // At some point this editor was removed and we're rebuilting it,
-      // hence we must add it to its parent.
-      this.parent.add(this);
-    }
-  }
-
-  setParent(parent) {
-    let mustBeSelected = false;
-    if (this.parent && !parent) {
-    } else if (parent) {
-      // If mustBeSelected is true it means that this editor was selected
-      // when its parent has been destroyed, hence we must select it again.
-      mustBeSelected =
-        !this.parent && this.div?.classList.contains("selectedEditor");
-    }
-    super.setParent(parent);
-    if (mustBeSelected) {
-      // We select it after the parent has been set.
-      this.select();
-    }
-  }
-
-  /** @inheritdoc */
-  select() {
-    super.select();
-  }
-
-  /** @inheritdoc */
-  unselect() {
-    super.unselect();
-  }
-
-  /** @inheritdoc */
-  static deserialize(data, parent, uiManager) {
-    const editor = super.deserialize(data, parent, uiManager);
-
-    return editor;
-  }
-
-  /** @inheritdoc */
-  serialize(isForCopying = false) {
-    // It doesn't make sense to copy/paste a highlight annotation.
-    if (this.isEmpty() || isForCopying) {
-      return null;
-    }
-
-    const rect = this.getRect(0, 0);
-
-    return {
-      annotationType: AnnotationEditorType.CROP,
-      pageIndex: this.pageIndex,
-      rect,
-      rotation: 0,
-      structTreeParentId: this._structTreeParentId,
-    };
-  }
-
-  static canCreateNewEmptyEditor() {
-    return false;
-  }
 }
 
 export { CropEditor };

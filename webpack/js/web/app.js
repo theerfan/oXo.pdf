@@ -79,6 +79,7 @@ import { Toolbar } from "./toolbar.js";
 import { ViewHistory } from "./view_history.js";
 import { GenericL10n } from "./genericl10n.js";
 import { getViewerConfiguration } from "./util.js";
+import { CropEditor } from "./editor/crop.js";
 
 const FORCE_PAGES_LOADED_TIMEOUT = 10000; // ms
 const WHEEL_ZOOM_DISABLED_TIMEOUT = 1000; // ms
@@ -134,13 +135,13 @@ const PDFViewerApplication = {
   initialBookmark: document.location.hash.substring(1),
   _initializedCapability: new PromiseCapability(),
   appConfig: null,
+  // This is the PDFlib version of our pdf
   pdfDoc: null,
-  cropMode: false,
-  cropResizing: false,
-  cropResizingDirection: null,
+  // This is the pdf.js version of our pdf
   pdfDocument: null,
   pdfLoadingTask: null,
   printService: null,
+  cropEditor: null,
   /** @type {PDFViewer} */
   pdfViewer: null,
   /** @type {PDFThumbnailViewer} */
@@ -2660,18 +2661,24 @@ function webViewerPrint() {
 
 
 function webViewerCrop() {
-  const currentPageNumber = PDFViewerApplication.pdfViewer.currentPageNumber;
-
-  // get the div with class="page" and data-page-number=current page number
-  const pageDiv = document.querySelector(`div.page[data-page-number="${currentPageNumber}"]`);
-  const cropOverlay = createCropOverlay();
-
-  if (cropOverlay) {
-    // Add the overlay to the page
-    pageDiv.appendChild(cropOverlay);
+  if (PDFViewerApplication.cropEditor !== null) {
+    PDFViewerApplication.cropEditor = null;
   }
+  else {
+    PDFViewerApplication.cropEditor = new CropEditor(PDFViewerApplication);
+  }
+  // const currentPageNumber = PDFViewerApplication.pdfViewer.currentPageNumber;
 
-  initializeDrag();
+  // // get the div with class="page" and data-page-number=current page number
+  // const pageDiv = document.querySelector(`div.page[data-page-number="${currentPageNumber}"]`);
+  // const cropOverlay = createCropOverlay();
+
+  // if (cropOverlay) {
+  //   // Add the overlay to the page
+  //   pageDiv.appendChild(cropOverlay);
+  // }
+
+  // initializeDrag();
 }
 
 //// ERFAN: This is where my crop code ends
