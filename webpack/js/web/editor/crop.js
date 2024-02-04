@@ -61,35 +61,32 @@ class CropEditor {
     document.addEventListener('keydown', async (event) => {
       if (event.ctrlKey && event.key === 'z') { // Undo
         if (this.undoStack.length > 0) {
-          const prevState = await window.PDFViewerApplication.pdfDoc.save();
-
-          let copyBuffer = new ArrayBuffer(prevState.length);
-          let originalView = new Uint8Array(prevState);
-          let copyView = new Uint8Array(copyBuffer);
-          copyView.set(originalView);
-
-          this.redoStack.push(copyView); // Save current state for redo
-
-          const newState = this.undoStack.pop();
+          const [currentPageNumber, currentPageDiv, pageRect] = this.getPageRect(window.PDFViewerApplication);
+          const libPdfDoc = window.PDFViewerApplication.pdfDoc;
+          const pdfLibPage = libPdfDoc.getPages()[currentPageNumber - 1];
+          const initialCropBox = this.undoStack.pop();
+          this.redoStack.push(pdfLibPage.getCropBox());
+          pdfLibPage.setCropBox(initialCropBox.x, initialCropBox.y, initialCropBox.width, initialCropBox.height);
+          const pdfBytes = await libPdfDoc.save();
           window.PDFViewerApplication.open({
-            data: newState,
+            data: pdfBytes,
           });
+          currentPageDiv.scrollIntoView({ behavior: 'smooth' });
         }
-      } else if (event.ctrlKey && event.shiftKey && event.key === 'z') { // Redo
-        if (redoStack.length > 0) {
-          const prevState = await window.PDFViewerApplication.pdfDoc.save();
-
-          let copyBuffer = new ArrayBuffer(prevState.length);
-          let originalView = new Uint8Array(prevState);
-          let copyView = new Uint8Array(copyBuffer);
-          copyView.set(originalView);
-
-          this.undoStack.push(copyView); // Save current state for undo
-          const newState = redoStack.pop();
-
+      } else if (event.ctrlKey && event.key === 'y') { // Redo
+        if (this.redoStack.length > 0) {
+          const [currentPageNumber, currentPageDiv, pageRect] = this.getPageRect(window.PDFViewerApplication);
+          const libPdfDoc = window.PDFViewerApplication.pdfDoc;
+          const pdfLibPage = libPdfDoc.getPages()[currentPageNumber - 1];
+          const initialCropBox = this.redoStack.pop();
+          this.undoStack.push(pdfLibPage.getCropBox());
+          pdfLibPage.setCropBox(initialCropBox.x, initialCropBox.y, initialCropBox.width, initialCropBox.height);
+          const pdfBytes = await libPdfDoc.save();
           window.PDFViewerApplication.open({
-            data: newState,
+            data: pdfBytes,
           });
+          currentPageDiv.scrollIntoView({ behavior: 'smooth' });
+
         }
       }
     });
@@ -307,11 +304,13 @@ class CropEditor {
 
     const cropOverlayRect = this.getCropOverlay().getBoundingClientRect();
 
+    const scrollX = window.scrollX;
+    const scrollY = window.scrollY;
 
     // Calculate the crop box dimensions based on the overlay's position and size
     const cropBox = {
-      x: (cropOverlayRect.left + this.#initialMismatch.left - pageRect.left) * scaleX,
-      y: (pageRect.bottom - this.#lastBottom) * scaleY,
+      x: (cropOverlayRect.left + this.#initialMismatch.left - pageRect.left + scrollX) * scaleX,
+      y: (pageRect.bottom - this.#lastBottom + scrollY) * scaleY,
       // x: handleRects.left.left - pageRect.left,
       // y: pageRect.bottom - handleRects.bottom.bottom,
       width: (cropOverlayRect.width + this.#initialMismatch.width) * scaleX,
@@ -325,21 +324,13 @@ class CropEditor {
       cropBox.y += initialCropBox.y;
     }
 
-    const prevBytes = await libPdfDoc.save();
-
     // Set the crop box for the current page (this part depends on how your PDF library handles cropping)
     pdfLibPage.setCropBox(cropBox.x, cropBox.y, cropBox.width, cropBox.height);
 
     const pdfBytes = await libPdfDoc.save();
 
     this.redoStack = [];
-
-    let copyBuffer = new ArrayBuffer(prevBytes.length);
-    let originalView = new Uint8Array(prevBytes);
-    let copyView = new Uint8Array(copyBuffer);
-    copyView.set(originalView);
-
-    this.undoStack.push(copyView);
+    this.undoStack.push(initialCropBox);
 
     PDFViewerApplication.open({
       data: pdfBytes,
