@@ -37,7 +37,7 @@ import {
   PathType,
   TilingPattern,
 } from "./pattern_helper.js";
-import { convertBlackAndWhiteToRGBA } from "../shared/image_utils.js";
+import { convertBlackAndWhiteToRGBA } from "./image_utils.js";
 
 // <canvas> contexts store most of the state we need natively.
 // However, PDF needs a bit more state, which we store here.

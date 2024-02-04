@@ -23,7 +23,7 @@
 // eslint-disable-next-line max-len
 /** @typedef {import("./text_accessibility.js").TextAccessibilityManager} TextAccessibilityManager */
 
-import { AnnotationLayer } from "./annotation_layer.js";}
+import { AnnotationLayer } from "./annotation_layer.js";
 import { PresentationModeState } from "./ui_utils.js";
 
 /**

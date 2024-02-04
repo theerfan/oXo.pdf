@@ -60,17 +60,17 @@ import {
   NodeCMapReaderFactory,
   NodeFilterFactory,
   NodeStandardFontDataFactory,
-} from "display-node_utils";
+} from "./stubs.js";
 import { CanvasGraphics } from "./canvas.js";
 import { cleanupTextLayer } from "./text_layer.js";
 import { GlobalWorkerOptions } from "./worker_options.js";
-import { MessageHandler } from "../shared/message_handler.js";
+import { MessageHandler } from "./message_handler.js";
 import { Metadata } from "./metadata.js";
 import { OptionalContentConfig } from "./optional_content_config.js";
 import { PDFDataTransportStream } from "./transport_stream.js";
-import { PDFFetchStream } from "display-fetch_stream";
-import { PDFNetworkStream } from "display-network";
-import { PDFNodeStream } from "display-node_stream";
+import { PDFFetchStream } from "./fetch_stream.js";
+import { PDFNetworkStream } from "./network.js";
+import { PDFNodeStream } from "./stubs.js";
 import { XfaText } from "./xfa_text.js";
 
 const DEFAULT_RANGE_CHUNK_SIZE = 65536; // 2^16 = 65536
@@ -308,12 +308,12 @@ function getDocument(src) {
     typeof src.useWorkerFetch === "boolean"
       ? src.useWorkerFetch
       : (typeof PDFJSDev !== "undefined" && PDFJSDev.test("MOZCENTRAL")) ||
-        (CMapReaderFactory === DOMCMapReaderFactory &&
-          StandardFontDataFactory === DOMStandardFontDataFactory &&
-          cMapUrl &&
-          standardFontDataUrl &&
-          isValidFetchUrl(cMapUrl, document.baseURI) &&
-          isValidFetchUrl(standardFontDataUrl, document.baseURI));
+      (CMapReaderFactory === DOMCMapReaderFactory &&
+        StandardFontDataFactory === DOMStandardFontDataFactory &&
+        cMapUrl &&
+        standardFontDataUrl &&
+        isValidFetchUrl(cMapUrl, document.baseURI) &&
+        isValidFetchUrl(standardFontDataUrl, document.baseURI));
   const canvasFactory =
     src.canvasFactory || new DefaultCanvasFactory({ ownerDocument });
   const filterFactory =
@@ -359,10 +359,7 @@ function getDocument(src) {
 
   const fetchDocParams = {
     docId,
-    apiVersion:
-      typeof PDFJSDev !== "undefined" && !PDFJSDev.test("TESTING")
-        ? PDFJSDev.eval("BUNDLE_VERSION")
-        : null,
+    apiVersion: '4.0.240',
     data,
     password,
     disableAutoFetch,
@@ -522,7 +519,7 @@ function getUrlProp(val) {
   }
   throw new Error(
     "Invalid PDF url data: " +
-      "either string or URL-object is expected in the url property."
+    "either string or URL-object is expected in the url property."
   );
 }
 
@@ -557,7 +554,7 @@ function getDataProp(val) {
   }
   throw new Error(
     "Invalid PDF binary data: either TypedArray, " +
-      "string, or array-like object is expected in the data property."
+    "string, or array-like object is expected in the data property."
   );
 }
 
@@ -757,7 +754,7 @@ class PDFDataRangeTransport {
     unreachable("Abstract method PDFDataRangeTransport.requestDataRange");
   }
 
-  abort() {}
+  abort() { }
 }
 
 /**
@@ -2264,7 +2261,7 @@ class PDFWorker {
       if (cachedPort._pendingDestroy) {
         throw new Error(
           "PDFWorker.fromPort - the worker is being destroyed.\n" +
-            "Please remember to await `PDFDocumentLoadingTask.destroy()`-calls."
+          "Please remember to await `PDFDocumentLoadingTask.destroy()`-calls."
         );
       }
       return cachedPort;
@@ -2415,7 +2412,7 @@ class WorkerTransport {
 
         const annotationStorage =
           renderingIntent & RenderingIntentFlag.PRINT &&
-          printAnnotationStorage instanceof PrintAnnotationStorage
+            printAnnotationStorage instanceof PrintAnnotationStorage
             ? printAnnotationStorage
             : this.annotationStorage;
 
@@ -2846,7 +2843,7 @@ class WorkerTransport {
     if (this.annotationStorage.size <= 0) {
       warn(
         "saveDocument called while `annotationStorage` is empty, " +
-          "please use the getData-method instead."
+        "please use the getData-method instead."
       );
     }
     const { map, transfer } = this.annotationStorage.serializable;
@@ -3279,8 +3276,8 @@ class InternalRenderTask {
       if (InternalRenderTask.#canvasInUse.has(this._canvas)) {
         throw new Error(
           "Cannot use the same canvas during multiple render() operations. " +
-            "Use different canvas or ensure previous operations were " +
-            "cancelled or completed."
+          "Use different canvas or ensure previous operations were " +
+          "cancelled or completed."
         );
       }
       InternalRenderTask.#canvasInUse.add(this._canvas);
@@ -3322,10 +3319,10 @@ class InternalRenderTask {
 
     this.callback(
       error ||
-        new RenderingCancelledException(
-          `Rendering cancelled, page ${this._pageIndex + 1}`,
-          extraDelay
-        )
+      new RenderingCancelledException(
+        `Rendering cancelled, page ${this._pageIndex + 1}`,
+        extraDelay
+      )
     );
   }
 
@@ -3387,11 +3384,13 @@ class InternalRenderTask {
 }
 
 /** @type {string} */
-const version =
-  typeof PDFJSDev !== "undefined" ? PDFJSDev.eval("BUNDLE_VERSION") : null;
+const version = "4.0.240";
+// const version =
+//   typeof PDFJSDev !== "undefined" ? PDFJSDev.eval("BUNDLE_VERSION") : null;
 /** @type {string} */
-const build =
-  typeof PDFJSDev !== "undefined" ? PDFJSDev.eval("BUNDLE_BUILD") : null;
+// const build =
+//   typeof PDFJSDev !== "undefined" ? PDFJSDev.eval("BUNDLE_BUILD") : null;
+const build = 'ffbfd680e';
 
 export {
   build,

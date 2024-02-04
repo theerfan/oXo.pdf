@@ -16,7 +16,7 @@
 /** @typedef {import("./interfaces").IDownloadManager} IDownloadManager */
 
 import { createValidAbsoluteUrl } from "./util.js";
-import { isPdfFile } from "./display_utils";
+import { isPdfFile } from "./display_utils.js";
 
 if (typeof PDFJSDev !== "undefined" && !PDFJSDev.test("CHROME || GENERIC")) {
   throw new Error(
