@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { AnnotationEditorType, shadow } from "../pdf.mjs";
+import { AnnotationEditorType, shadow } from "./util.js";
 import { CursorTool, PresentationModeState } from "./ui_utils.js";
 import { GrabToPan } from "./grab_to_pan.js";
 

@@ -13,7 +13,8 @@
  * limitations under the License.
  */
 
-import { AnnotationEditorType, noContextMenu } from "../pdf.mjs";
+import { noContextMenu } from "./display_utils.js";
+import { AnnotationEditorType } from "./util.js";
 import { ColorPicker } from "./editor/color_picker.js";
 import {
   DEFAULT_SCALE,

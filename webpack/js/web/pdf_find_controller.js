@@ -19,7 +19,7 @@
 
 import { binarySearchFirstItem, scrollIntoView } from "./ui_utils.js";
 import { getCharacterType, getNormalizeWithNFKC } from "./pdf_find_utils.js";
-import { PromiseCapability } from "../pdf.mjs";
+import { PromiseCapability } from "./util.js";
 
 const FindState = {
   FOUND: 0,

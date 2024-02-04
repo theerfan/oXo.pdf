@@ -15,12 +15,13 @@
 
 /** @typedef {import("./interfaces").IDownloadManager} IDownloadManager */
 
-import { createValidAbsoluteUrl, isPdfFile } from "../pdf.mjs";
+import { createValidAbsoluteUrl } from "./util.js";
+import { isPdfFile } from "./display_utils";
 
 if (typeof PDFJSDev !== "undefined" && !PDFJSDev.test("CHROME || GENERIC")) {
   throw new Error(
     'Module "pdfjs-web/download_manager" shall not be used ' +
-      "outside CHROME and GENERIC builds."
+    "outside CHROME and GENERIC builds."
   );
 }
 

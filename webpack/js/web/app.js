@@ -34,24 +34,12 @@ import {
   TextLayerMode,
 } from "./ui_utils.js";
 
-import {
-  AnnotationEditorType,
-  build,
-  FeatureTest,
-  getDocument,
-  getFilenameFromUrl,
-  getPdfFilenameFromUrl,
-  GlobalWorkerOptions,
-  InvalidPDFException,
-  isDataScheme,
-  isPdfFile,
-  MissingPDFException,
-  PDFWorker,
-  PromiseCapability,
-  shadow,
-  UnexpectedResponseException,
-  version,
-} from "../pdf.mjs";
+import { AnnotationEditorType, FeatureTest, InvalidPDFException, MissingPDFException, PromiseCapability, shadow, UnexpectedResponseException } from "./util.js";
+import { build, getDocument, PDFWorker, version } from "./api.js";
+import { getFilenameFromUrl, getPdfFilenameFromUrl, isDataScheme, isPdfFile, } from "./display_utils.js";
+import { GlobalWorkerOptions } from "./worker_options.js";
+
+
 
 import { AppOptions, OptionKind } from "./app_options.js";
 import { AutomationEventBus, EventBus } from "./event_utils.js";

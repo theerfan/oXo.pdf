@@ -15,7 +15,8 @@
 
 /** @typedef {import("./interfaces").IL10n} IL10n */
 
-import { fetchData, shadow } from "../pdf.mjs";
+import { fetchData } from './display_utils.js';
+import { shadow } from './util.js';
 import { FluentBundle, FluentResource } from 'https://cdn.skypack.dev/@fluent/bundle';
 import { DOMLocalization } from 'http://localhost:8000/cdn/fluent-dom/index.js';
 import { L10n } from "./l10n.js";

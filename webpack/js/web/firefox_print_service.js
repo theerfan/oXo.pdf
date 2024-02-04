@@ -13,12 +13,9 @@
  * limitations under the License.
  */
 
-import {
-  AnnotationMode,
-  PixelsPerInch,
-  RenderingCancelledException,
-  shadow,
-} from "../pdf.mjs";
+import { AnnotationMode, shadow } from "./util.js";
+import { PixelsPerInch } from "./display_utils.js";
+import { RenderingCancelledException } from "./display_utils.js";
 import { getXfaHtmlForPrinting } from "./print_utils.js";
 import { PDFPrintServiceFactory } from "./app.js";
 

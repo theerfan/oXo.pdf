@@ -17,7 +17,7 @@
 
 import { FluentBundle, FluentResource } from 'https://cdn.skypack.dev/@fluent/bundle';
 import { DOMLocalization } from 'http://localhost:8000/cdn/fluent-dom/index.js';
-import { fetchData } from "../pdf.mjs";
+import { fetchData } from './display_utils.js';
 import { L10n } from "./l10n.js";
 
 /**

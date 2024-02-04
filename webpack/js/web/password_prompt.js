@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { PasswordResponses, PromiseCapability } from "../pdf.mjs";
+import { PasswordResponses, PromiseCapability } from "./util.js";
 
 /**
  * @typedef {Object} PasswordPromptOptions

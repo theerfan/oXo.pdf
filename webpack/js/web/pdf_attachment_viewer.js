@@ -13,7 +13,8 @@
  * limitations under the License.
  */
 
-import { getFilenameFromUrl, PromiseCapability } from "../pdf.mjs";
+import { getFilenameFromUrl } from "./display_utils.js";
+import { PromiseCapability } from "./util.js";
 import { BaseTreeViewer } from "./base_tree_viewer.js";
 import { waitOnEventOrTimeout } from "./event_utils.js";
 

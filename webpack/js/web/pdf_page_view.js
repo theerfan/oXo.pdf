@@ -23,14 +23,8 @@
 // eslint-disable-next-line max-len
 /** @typedef {import("./pdf_rendering_queue").PDFRenderingQueue} PDFRenderingQueue */
 
-import {
-  AbortException,
-  AnnotationMode,
-  PixelsPerInch,
-  RenderingCancelledException,
-  setLayerDimensions,
-  shadow,
-} from "../pdf.mjs";
+import { AnnotationMode, shadow, AbortException } from "./util.js";
+import { RenderingCancelledException, setLayerDimensions, PixelsPerInch } from "./display_utils.js";
 import {
   approximateFraction,
   DEFAULT_SCALE,
@@ -89,17 +83,17 @@ const DEFAULT_LAYER_PROPERTIES =
   typeof PDFJSDev === "undefined" || !PDFJSDev.test("COMPONENTS")
     ? null
     : {
-        annotationEditorUIManager: null,
-        annotationStorage: null,
-        downloadManager: null,
-        enableScripting: false,
-        fieldObjectsPromise: null,
-        findController: null,
-        hasJSActionsPromise: null,
-        get linkService() {
-          return new SimpleLinkService();
-        },
-      };
+      annotationEditorUIManager: null,
+      annotationStorage: null,
+      downloadManager: null,
+      enableScripting: false,
+      fieldObjectsPromise: null,
+      findController: null,
+      hasJSActionsPromise: null,
+      get linkService() {
+        return new SimpleLinkService();
+      },
+    };
 
 /**
  * @implements {IRenderableView}

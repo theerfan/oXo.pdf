@@ -20,7 +20,7 @@
 /** @typedef {import("../src/display/display_utils").PageViewport} PageViewport */
 /** @typedef {import("./interfaces").IPDFLinkService} IPDFLinkService */
 
-import { XfaLayer } from "../pdf.mjs";
+import { XfaLayer } from "./xfa_layer.js";
 
 /**
  * @typedef {Object} XfaLayerBuilderOptions

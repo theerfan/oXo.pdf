@@ -28,16 +28,11 @@
 // eslint-disable-next-line max-len
 /** @typedef {import("./pdf_scripting_manager").PDFScriptingManager} PDFScriptingManager */
 
-import {
-  AnnotationEditorType,
-  // AnnotationEditorUIManager,
-  AnnotationMode,
-  PermissionFlag,
-  PixelsPerInch,
-  PromiseCapability,
-  shadow,
-  version,
-} from "../pdf.mjs";
+import { AnnotationEditorType, AnnotationMode, PermissionFlag, PromiseCapability, shadow } from "./util.js";
+import { PixelsPerInch } from "./display_utils.js";
+import { version } from "./api.js";
+
+
 import {
   DEFAULT_SCALE,
   DEFAULT_SCALE_DELTA,

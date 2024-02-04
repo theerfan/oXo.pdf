@@ -14,7 +14,8 @@
  */
 
 import { getPageSizeInches, isPortraitOrientation } from "./ui_utils.js";
-import { PDFDateString, PromiseCapability } from "../pdf.mjs";
+import { PDFDateString } from "./display_utils.js";
+import { PromiseCapability } from "./util.js";
 
 const DEFAULT_FIELD_CONTENT = "-";
 
