@@ -2430,10 +2430,16 @@ if (typeof PDFJSDev === "undefined" || PDFJSDev.test("GENERIC")) {
     }
     const file = evt.fileInput.files[0];
 
-    PDFViewerApplication.open({
-      url: URL.createObjectURL(file),
-      originalUrl: file.name,
-    });
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        const fileBytes = new Uint8Array(e.target.result);
+        PDFViewerApplication.open({
+          data: fileBytes,
+        });
+      }
+      reader.readAsArrayBuffer(file);
+    }
   };
 
   // eslint-disable-next-line no-var
