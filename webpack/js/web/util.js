@@ -425,7 +425,7 @@ function createValidAbsoluteUrl(url, baseUrl = null, options = null) {
       if (options.tryConvertEncoding) {
         try {
           url = stringToUTF8String(url);
-        } catch {}
+        } catch { }
       }
     }
 
@@ -947,7 +947,7 @@ function stringToPDFString(str) {
     const charCode = str.charCodeAt(i);
     if (charCode === 0x1b) {
       // eslint-disable-next-line no-empty
-      while (++i < ii && str.charCodeAt(i) !== 0x1b) {}
+      while (++i < ii && str.charCodeAt(i) !== 0x1b) { }
       continue;
     }
     const code = PDFStringTranslateTable[charCode];
@@ -1209,10 +1209,7 @@ function getViewerConfiguration() {
       editorStampAddImage: document.getElementById("editorStampAddImage"),
     },
     printContainer: document.getElementById("printContainer"),
-    openFileInput:
-      typeof PDFJSDev === "undefined" || PDFJSDev.test("GENERIC")
-        ? document.getElementById("fileInput")
-        : null,
+    openFileInput: document.getElementById("fileInput"),
     debuggerScriptPath: "./debugger.mjs",
   };
 }

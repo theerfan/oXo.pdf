@@ -209,12 +209,15 @@ See https://github.com/adobe-type-tools/cmap-resources
 
       <div id="secondaryToolbar" class="secondaryToolbar hidden doorHangerRight">
         <div id="secondaryToolbarButtonContainer">
-          <!--#if GENERIC-->
           <button id="secondaryOpenFile" class="secondaryToolbarButton" title="Open File" tabindex="51"
             data-l10n-id="pdfjs-open-file-button">
-            <span data-l10n-id="pdfjs-open-file-button-label">Open</span>
+            <span data-l10n-id="pdfjs-open-file-button-label">Open File</span>
           </button>
-          <!--#endif-->
+
+          <button id="secondaryOpenFileURL" class="secondaryToolbarButton" title="Open URL" tabindex="51"
+            data-l10n-id="pdfjs-open-url-button">
+            <span data-l10n-id="pdfjs-open-url-button-label">Open URL</span>
+          </button>
 
           <button id="secondaryPrint" class="secondaryToolbarButton visibleMediumView" title="Print" tabindex="52"
             data-l10n-id="pdfjs-print-button">
@@ -383,8 +386,8 @@ See https://github.com/adobe-type-tools/cmap-resources
               <div id="editorModeSeparator" class="verticalToolbarSeparator"></div>
 
               <button id="crop" class="toolbarButton hiddenMediumView" title="Crop" tabindex="40"
-                data-l10n-id="pdfjs-print-button">
-                <span data-l10n-id="pdfjs-print-button-label">Crop</span>
+                data-l10n-id="pdfjs-crop-button">
+                <span data-l10n-id="pdfjs-crop-button-label">Crop</span>
               </button>
 
               <button id="print" class="toolbarButton hiddenMediumView" title="Print" tabindex="41"

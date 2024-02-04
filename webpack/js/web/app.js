@@ -627,41 +627,39 @@ const PDFViewerApplication = {
       file = AppOptions.get("defaultUrl");
     }
 
-    if (typeof PDFJSDev === "undefined" || PDFJSDev.test("GENERIC")) {
-      const fileInput = appConfig.openFileInput;
-      fileInput.value = null;
+    const fileInput = appConfig.openFileInput;
+    fileInput.value = null;
 
-      fileInput.addEventListener("change", function (evt) {
-        const { files } = evt.target;
-        if (!files || files.length === 0) {
-          return;
-        }
-        eventBus.dispatch("fileinputchange", {
-          source: this,
-          fileInput: evt.target,
-        });
+    fileInput.addEventListener("change", function (evt) {
+      const { files } = evt.target;
+      if (!files || files.length === 0) {
+        return;
+      }
+      eventBus.dispatch("fileinputchange", {
+        source: this,
+        fileInput: evt.target,
       });
+    });
 
-      // Enable dragging-and-dropping a new PDF file onto the viewerContainer.
-      appConfig.mainContainer.addEventListener("dragover", function (evt) {
-        evt.preventDefault();
+    // Enable dragging-and-dropping a new PDF file onto the viewerContainer.
+    appConfig.mainContainer.addEventListener("dragover", function (evt) {
+      evt.preventDefault();
 
-        evt.dataTransfer.dropEffect =
-          evt.dataTransfer.effectAllowed === "copy" ? "copy" : "move";
+      evt.dataTransfer.dropEffect =
+        evt.dataTransfer.effectAllowed === "copy" ? "copy" : "move";
+    });
+    appConfig.mainContainer.addEventListener("drop", function (evt) {
+      evt.preventDefault();
+
+      const { files } = evt.dataTransfer;
+      if (!files || files.length === 0) {
+        return;
+      }
+      eventBus.dispatch("fileinputchange", {
+        source: this,
+        fileInput: evt.dataTransfer,
       });
-      appConfig.mainContainer.addEventListener("drop", function (evt) {
-        evt.preventDefault();
-
-        const { files } = evt.dataTransfer;
-        if (!files || files.length === 0) {
-          return;
-        }
-        eventBus.dispatch("fileinputchange", {
-          source: this,
-          fileInput: evt.dataTransfer,
-        });
-      });
-    }
+    });
 
     if (!AppOptions.get("supportsDocumentFonts")) {
       AppOptions.set("disableFontFace", true);
@@ -1926,6 +1924,8 @@ const PDFViewerApplication = {
     eventBus._on("findfromurlhash", webViewerFindFromUrlHash);
     eventBus._on("updatefindmatchescount", webViewerUpdateFindMatchesCount);
     eventBus._on("updatefindcontrolstate", webViewerUpdateFindControlState);
+    eventBus._on("fileinputchange", webViewerFileInputChange);
+    eventBus._on("openfile", webViewerOpenFile);
 
     if (AppOptions.get("pdfBug")) {
       _boundEvents.reportPageStatsPDFBug = reportPageStatsPDFBug;
@@ -1933,10 +1933,7 @@ const PDFViewerApplication = {
       eventBus._on("pagerendered", _boundEvents.reportPageStatsPDFBug);
       eventBus._on("pagechanging", _boundEvents.reportPageStatsPDFBug);
     }
-    if (typeof PDFJSDev === "undefined" || PDFJSDev.test("GENERIC")) {
-      eventBus._on("fileinputchange", webViewerFileInputChange);
-      eventBus._on("openfile", webViewerOpenFile);
-    }
+
     if (typeof PDFJSDev !== "undefined" && PDFJSDev.test("MOZCENTRAL")) {
       // The `unbindEvents` method is unused in MOZCENTRAL builds,
       // hence we don't need to unregister these event listeners.
@@ -2422,32 +2419,30 @@ function webViewerHashchange(evt) {
   }
 }
 
-if (typeof PDFJSDev === "undefined" || PDFJSDev.test("GENERIC")) {
-  // eslint-disable-next-line no-var
-  var webViewerFileInputChange = function (evt) {
-    if (PDFViewerApplication.pdfViewer?.isInPresentationMode) {
-      return; // Opening a new PDF file isn't supported in Presentation Mode.
-    }
-    const file = evt.fileInput.files[0];
+// eslint-disable-next-line no-var
+var webViewerFileInputChange = function (evt) {
+  if (PDFViewerApplication.pdfViewer?.isInPresentationMode) {
+    return; // Opening a new PDF file isn't supported in Presentation Mode.
+  }
+  const file = evt.fileInput.files[0];
 
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = function (e) {
-        const fileBytes = new Uint8Array(e.target.result);
-        PDFViewerApplication.open({
-          data: fileBytes,
-        });
-      }
-      reader.readAsArrayBuffer(file);
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      const fileBytes = new Uint8Array(e.target.result);
+      PDFViewerApplication.open({
+        data: fileBytes,
+      });
     }
-  };
-
-  // eslint-disable-next-line no-var
-  var webViewerOpenFile = function (evt) {
-    const fileInput = PDFViewerApplication.appConfig.openFileInput;
-    fileInput.click();
-  };
+    reader.readAsArrayBuffer(file);
+  }
 }
+
+// eslint-disable-next-line no-var
+var webViewerOpenFile = function (evt) {
+  const fileInput = PDFViewerApplication.appConfig.openFileInput;
+  fileInput.click();
+};
 
 function webViewerPresentationMode() {
   PDFViewerApplication.requestPresentationMode();
@@ -2464,196 +2459,6 @@ function webViewerPrint() {
 
 //// ERFAN: this is the start of my crop code.
 
-
-// function getCropHandles() {
-//   return {
-//     left: document.getElementById('crop-left-handle'),
-//     right: document.getElementById('crop-right-handle'),
-//     top: document.getElementById('crop-top-handle'),
-//     bottom: document.getElementById('crop-bottom-handle')
-//   };
-// }
-
-// function getCropHandleRects() {
-//   const handles = getCropHandles();
-//   return {
-//     left: handles.left.getBoundingClientRect(),
-//     right: handles.right.getBoundingClientRect(),
-//     top: handles.top.getBoundingClientRect(),
-//     bottom: handles.bottom.getBoundingClientRect()
-//   };
-// }
-
-
-// // Function to initialize drag functionality
-// function initializeDrag() {
-//   const cropOverlay = document.getElementById('crop-overlay');
-//   const handles = getCropHandles();
-
-//   let startingMouseX, startingMouseY, startWidth, startHeight;
-
-//   // Function to start the resizing
-//   function initDrag(e, handle) {
-//     startingMouseX = e.clientX;
-//     startingMouseY = e.clientY;
-//     startWidth = parseInt(document.defaultView.getComputedStyle(cropOverlay).width, 10);
-//     startHeight = parseInt(document.defaultView.getComputedStyle(cropOverlay).height, 10);
-
-//     // Capture the initial left and top positions
-//     const rect = cropOverlay.getBoundingClientRect();
-//     var initialLeft;
-//     if (cropOverlay.offsetLeft === "0px") {
-//       initialLeft = rect.left + window.scrollX;
-//     }
-//     else {
-//       initialLeft = parseInt(cropOverlay.offsetLeft, 10);
-//     }
-
-//     document.documentElement.addEventListener('mousemove', doDrag, false);
-//     document.documentElement.addEventListener('mouseup', stopDrag, false);
-
-//     function doDrag(e) {
-//       e.preventDefault();
-//       let newWidth, newHeight, newLeft, newTop;
-//       switch (handle) {
-//         case 'left':
-//           newWidth = startWidth + (startingMouseX - e.clientX);
-//           newLeft = initialLeft - (startingMouseX - e.clientX);
-//           if (newWidth > 0) {
-//             cropOverlay.style.width = newWidth + 'px';
-//             cropOverlay.style.left = newLeft + 'px';
-//           }
-//           break;
-//         case 'right':
-//           newWidth = startWidth + (e.clientX - startingMouseX);
-//           if (newWidth > 0) {
-//             cropOverlay.style.width = newWidth + 'px';
-//           }
-//           break;
-//         case 'top':
-//           newHeight = startHeight + (startingMouseY - e.clientY);
-//           if (newHeight > 0) {
-//             cropOverlay.style.height = newHeight + 'px';
-//             cropOverlay.style.top = e.clientY + 'px';
-//           }
-//           break;
-//         case 'bottom':
-//           newHeight = startHeight + (e.clientY - startingMouseY);
-//           if (newHeight > 0) {
-//             cropOverlay.style.height = newHeight + 'px';
-//           }
-//           break;
-//       }
-//     }
-
-//     function stopDrag() {
-//       document.documentElement.removeEventListener('mousemove', doDrag, false);
-//       document.documentElement.removeEventListener('mouseup', stopDrag, false);
-//     }
-//   }
-
-//   // Add mousedown event listeners to each handle
-//   Object.keys(handles).forEach(handle => {
-//     handles[handle].addEventListener('mousedown', function (e) {
-//       initDrag(e, handle);
-//     }, false);
-//   });
-// }
-
-
-// function createCropOverlay() {
-//   if (document.getElementById("crop-overlay")) {
-//     return null;
-//   }
-
-//   const cropOverlay = document.createElement("div");
-//   cropOverlay.id = "crop-overlay";
-//   cropOverlay.style.position = "absolute";
-//   cropOverlay.style.top = "0";
-//   cropOverlay.style.left = "0";
-//   cropOverlay.style.width = "100%";
-//   cropOverlay.style.height = "100%";
-//   cropOverlay.style.zIndex = "1000";
-
-//   // Add the handles to the overlay
-//   const cropLeft = document.createElement("div");
-//   cropLeft.id = "crop-left-handle";
-//   cropLeft.classList.add("crop-resize-handle");
-//   cropOverlay.appendChild(cropLeft);
-
-//   const cropRight = document.createElement("div");
-//   cropRight.id = "crop-right-handle";
-//   cropRight.classList.add("crop-resize-handle");
-//   cropOverlay.appendChild(cropRight);
-
-//   const cropTop = document.createElement("div");
-//   cropTop.id = "crop-top-handle";
-//   cropTop.classList.add("crop-resize-handle");
-//   cropOverlay.appendChild(cropTop);
-
-//   const cropBottom = document.createElement("div");
-//   cropBottom.id = "crop-bottom-handle";
-//   cropBottom.classList.add("crop-resize-handle");
-//   cropOverlay.appendChild(cropBottom);
-
-//   const cropConfirmButton = document.createElement("button");
-//   cropConfirmButton.id = "crop-confirm-button";
-//   cropConfirmButton.style.position = "absolute";
-//   cropConfirmButton.style.bottom = "10px";
-//   cropConfirmButton.style.right = "10px";
-//   cropConfirmButton.style.zIndex = "1001";
-//   cropConfirmButton.innerText = "Confirm Crop";
-//   cropConfirmButton.addEventListener("click", confirmCrop);
-//   cropOverlay.appendChild(cropConfirmButton);
-
-//   return cropOverlay;
-// }
-
-// async function confirmCrop() {
-//   const currentPageNumber = PDFViewerApplication.pdfViewer.currentPageNumber;
-//   const currentPageDiv = document.querySelector(`div.page[data-page-number="${currentPageNumber}"]`);
-//   const pageRect = currentPageDiv.getBoundingClientRect();
-
-//   // PDFViewerApplication.pdfDoc is the loaded PDFLib document
-//   const libPdfDoc = PDFViewerApplication.pdfDoc;
-//   const jsPdfDoc = await PDFViewerApplication.pdfDocument;
-
-//   const handleRects = getCropHandleRects();
-
-//   // Get the current page
-//   const pdfLibPage = libPdfDoc.getPages()[currentPageNumber - 1];
-//   const initialCropBox = pdfLibPage.getCropBox();
-
-//   // Calculate the scale factor between the displayed page and the original PDF page size
-//   const scaleX = initialCropBox.width / pageRect.width;
-//   const scaleY = initialCropBox.height / pageRect.height;
-
-
-//   // Calculate the crop box dimensions based on the overlay's position and size
-//   const cropBox = {
-//     x: handleRects.left.left - pageRect.left,
-//     y: pageRect.bottom - handleRects.bottom.bottom,
-//     width: (handleRects.right.left - (handleRects.left.left + handleRects.left.width)) * scaleX,
-//     height: (handleRects.bottom.top - handleRects.top.top) * scaleY
-//   };
-
-
-//   console.log(cropBox);
-
-//   // Set the crop box for the current page (this part depends on how your PDF library handles cropping)
-//   pdfLibPage.setCropBox(cropBox.x, cropBox.y, cropBox.width, cropBox.height); 
-
-//   const pdfBytes = await libPdfDoc.save();
-
-//   PDFViewerApplication.open({
-//     data: pdfBytes,
-//   });
-
-//   currentPageDiv.scrollIntoView({ behavior: 'smooth' });
-
-// }
-
-
 function webViewerCrop() {
   if (PDFViewerApplication.cropEditor !== null) {
     PDFViewerApplication.cropEditor = null;
@@ -2661,18 +2466,6 @@ function webViewerCrop() {
   else {
     PDFViewerApplication.cropEditor = new CropEditor(PDFViewerApplication);
   }
-  // const currentPageNumber = PDFViewerApplication.pdfViewer.currentPageNumber;
-
-  // // get the div with class="page" and data-page-number=current page number
-  // const pageDiv = document.querySelector(`div.page[data-page-number="${currentPageNumber}"]`);
-  // const cropOverlay = createCropOverlay();
-
-  // if (cropOverlay) {
-  //   // Add the overlay to the page
-  //   pageDiv.appendChild(cropOverlay);
-  // }
-
-  // initializeDrag();
 }
 
 //// ERFAN: This is where my crop code ends
