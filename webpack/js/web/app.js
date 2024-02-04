@@ -1926,6 +1926,7 @@ const PDFViewerApplication = {
     eventBus._on("updatefindcontrolstate", webViewerUpdateFindControlState);
     eventBus._on("fileinputchange", webViewerFileInputChange);
     eventBus._on("openfile", webViewerOpenFile);
+    eventBus._on("openurl", webViewerOpenURL);
 
     if (AppOptions.get("pdfBug")) {
       _boundEvents.reportPageStatsPDFBug = reportPageStatsPDFBug;
@@ -2443,6 +2444,53 @@ var webViewerOpenFile = function (evt) {
   const fileInput = PDFViewerApplication.appConfig.openFileInput;
   fileInput.click();
 };
+
+var webViewerOpenURL = function (evt) {
+  // Create a div element to hold the prompt and input
+  const container = document.createElement("div");
+  container.id = "urlInputContainer";
+  container.setAttribute("style", "position: fixed; top: 0; left: 0; width: 100%; background: rgba(0, 0, 0, 0.5); padding: 20px; box-sizing: border-box;");
+
+  // Create a label element as a prompt for the user
+  const label = document.createElement("div");
+  label.textContent = "Please input a URL:";
+  label.setAttribute("style", "color: white; font-size: 16px; margin-bottom: 10px; margin-top: 2%;");
+  container.appendChild(label);
+
+  // Create an input element to get a url from the user
+  const input = document.createElement("input");
+  input.id = "openURL";
+  input.type = "url";
+  input.setAttribute("style", "width: 100%;");
+  input.setAttribute("placeholder", "https://example.com"); // Faded hint for the user
+
+  input.oncontextmenu = function () {
+    // Allow the context menu to show
+    return true;
+  };
+
+  input.onkeydown = function (event) {
+    if (event.key === "Enter") {
+      // Don't submit the form
+      event.preventDefault();
+      // Remove the container from the document
+      container.remove();
+      // Open the PDF specified in the input
+      PDFViewerApplication.open({
+        url: input.value,
+      });
+    } else if (event.key === "Escape") {
+      // Remove the container from the document
+      container.remove();
+    }
+  };
+
+  container.appendChild(input); // Add the input to the container
+  document.body.appendChild(container); // Add the container to the document
+  input.focus(); // Focus the input field immediately
+}
+
+
 
 function webViewerPresentationMode() {
   PDFViewerApplication.requestPresentationMode();

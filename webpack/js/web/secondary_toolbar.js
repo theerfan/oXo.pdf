@@ -30,6 +30,7 @@ import { PagesCountLimit } from "./pdf_viewer.js";
  * @property {HTMLButtonElement} presentationModeButton - Button for entering
  *   presentation mode.
  * @property {HTMLButtonElement} openFileButton - Button to open a file.
+ * @property {HTMLButtonElement} openURLButton - Button to open a file via URL.
  * @property {HTMLButtonElement} printButton - Button to print the document.
  * @property {HTMLButtonElement} downloadButton - Button to download the
  *   document.
@@ -143,6 +144,11 @@ class SecondaryToolbar {
       {
         element: options.openFileButton,
         eventName: "openfile",
+        close: true,
+      },
+      {
+        element: options.openURLButton,
+        eventName: "openurl",
         close: true,
       }
     ];
