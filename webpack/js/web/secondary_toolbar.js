@@ -31,6 +31,8 @@ import { PagesCountLimit } from "./pdf_viewer.js";
  *   presentation mode.
  * @property {HTMLButtonElement} openFileButton - Button to open a file.
  * @property {HTMLButtonElement} openURLButton - Button to open a file via URL.
+ * @property {HTMLButtonElement} insertPageButton - Button to insert a page.
+ * @property {HTMLButtonElement} deletePageButton - Button to delete a page.
  * @property {HTMLButtonElement} printButton - Button to print the document.
  * @property {HTMLButtonElement} downloadButton - Button to download the
  *   document.
@@ -61,6 +63,8 @@ class SecondaryToolbar {
    */
   constructor(options, eventBus) {
     this.#opts = options;
+    // Close is used to determine whether or not the UI should close the
+    // toolbar when a button is clicked. The default value is true.
     const buttons = [
       {
         element: options.presentationModeButton,
@@ -150,6 +154,16 @@ class SecondaryToolbar {
         element: options.openURLButton,
         eventName: "openurl",
         close: true,
+      },
+      {
+        element: options.insertPageButton,
+        eventName: "insertpage",
+        close: false,
+      },
+      {
+        element: options.deletePageButton,
+        eventName: "deletepage",
+        close: false,
       }
     ];
 
@@ -214,7 +228,7 @@ class SecondaryToolbar {
     for (const { element, eventName, close, eventDetails } of buttons) {
       element.addEventListener("click", evt => {
         if (eventName !== null) {
-          eventBus.dispatch(eventName, { source: this, ...eventDetails });
+          eventBus.dispatch(eventName, { source: this, ...eventDetails, name: eventName});
         }
         if (close) {
           this.close();

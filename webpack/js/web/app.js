@@ -68,6 +68,7 @@ import { ViewHistory } from "./view_history.js";
 import { GenericL10n } from "./genericl10n.js";
 import { getViewerConfiguration } from "./util.js";
 import { CropEditor } from "./editor/crop.js";
+import { PageOrganizer } from "./editor/page_organizer.js";
 
 const FORCE_PAGES_LOADED_TIMEOUT = 10000; // ms
 const WHEEL_ZOOM_DISABLED_TIMEOUT = 1000; // ms
@@ -198,6 +199,7 @@ const PDFViewerApplication = {
   _touchInfo: null,
   _isCtrlKeyDown: false,
   _nimbusDataPromise: null,
+  pageOrganizer: new PageOrganizer(),
 
   // Called once when the document is loaded.
   async initialize(appConfig) {
@@ -1927,6 +1929,9 @@ const PDFViewerApplication = {
     eventBus._on("fileinputchange", webViewerFileInputChange);
     eventBus._on("openfile", webViewerOpenFile);
     eventBus._on("openurl", webViewerOpenURL);
+    eventBus._on("insertpage", webViewerInsertPage);
+    eventBus._on("deletepage", webViewerDeletePage);
+
 
     if (AppOptions.get("pdfBug")) {
       _boundEvents.reportPageStatsPDFBug = reportPageStatsPDFBug;
@@ -2489,6 +2494,50 @@ var webViewerOpenURL = function (evt) {
   document.body.appendChild(container); // Add the container to the document
   input.focus(); // Focus the input field immediately
 }
+
+function webViewerInsertPage(evt) {
+  evt.name = "insertpage";
+  const a = 1;
+  PDFViewerApplication.pageOrganizer.createPageNumberInput(evt);
+  // Stop the secondary toolbar from closing
+  // evt.preventDefault();
+  // const { pdfDocument, pdfViewer, pdfThumbnailViewer } = PDFViewerApplication;
+  // if (!pdfDocument || !pdfViewer || !pdfThumbnailViewer) {
+  //   return;
+  // }
+  // const pageNumber = evt.pageNumber;
+  // const pdfPagesCount = pdfDocument.numPages;
+  // if (pageNumber <= 0 || pageNumber > pdfPagesCount) {
+  //   return;
+  // }
+  // const params = {
+  //   pdfDocument,
+  //   pageNumber,
+  // };
+  // const pdfPageView = new PDFPageView(params);
+  // pdfViewer._pages.splice(pageNumber - 1, 0, pdfPageView);
+  // pdfViewer._scrollIntoView(pageNumber);
+  // pdfThumbnailViewer._insertThumbnail(pageNumber);
+  // pdfViewer.update();
+  // if (pdfViewer._currentPageNumber === pdfPagesCount) {
+  //   pdfViewer._setCurrentPageNumber(pdfPagesCount + 1);
+  // }
+  // pdfViewer._setCurrentPageNumber(pdfPagesCount);
+}
+
+function webViewerDeletePage(evt) {
+  const a = 2;
+  evt.name = "deletepage";
+  PDFViewerApplication.pageOrganizer.createPageNumberInput(evt);
+  // const libPdfDoc = PDFViewerApplication.pdfDoc;
+  // const currentPageNumber = PDFViewerApplication.pdfViewer.currentPageNumber;
+  // if (currentPageNumber > 0 && currentPageNumber <= libPdfDoc.getPageCount()) {
+  //   libPdfDoc.removePage(currentPageNumber - 1);
+  //   const pdfBytes = libPdfDoc.save();
+
+  // }
+}
+
 
 
 

@@ -51,6 +51,13 @@ pdfjs-crop-button-label = Crop
 pdfjs-save-button =
     .title = Save
 pdfjs-save-button-label = Save
+pdfjs-insert-page-button =
+    .title = Insert Page
+pdfjs-insert-page-button-label = Insert Page
+pdfjs-delete-page-button =
+    .title = Delete Page
+pdfjs-delete-page-button-label = Delete Page
+
 
 # Used in Firefox for Android as a tooltip for the download button (“download” is a verb).
 pdfjs-download-button =

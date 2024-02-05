@@ -86,7 +86,6 @@ class CropEditor {
             data: pdfBytes,
           });
           currentPageDiv.scrollIntoView({ behavior: 'smooth' });
-
         }
       }
     });

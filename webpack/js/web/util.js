@@ -1116,6 +1116,8 @@ function getViewerConfiguration() {
       presentationModeButton: document.getElementById("presentationMode"),
       openFileButton: document.getElementById("secondaryOpenFile"),
       openURLButton: document.getElementById("secondaryOpenFileURL"),
+      insertPageButton: document.getElementById("insertPage"),
+      deletePageButton: document.getElementById("deletePage"),
       printButton: document.getElementById("secondaryPrint"),
       downloadButton: document.getElementById("secondaryDownload"),
       viewBookmarkButton: document.getElementById("viewBookmark"),
