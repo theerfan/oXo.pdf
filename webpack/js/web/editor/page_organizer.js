@@ -54,7 +54,32 @@ class PageOrganizer {
             }
         });
 
+    }
 
+    async insertPage(insertAt) {
+        const PDFViewerApplication = window.PDFViewerApplication;
+        const libPdfDoc = PDFViewerApplication.pdfDoc;
+        const pageSize = libPdfDoc.getPage(insertAt - 1).getSize();
+        const pagesizeList = [pageSize.width, pageSize.height]
+        const blankPage = libPdfDoc.insertPage(insertAt - 1, pagesizeList);
+        const pdfBytes = await libPdfDoc.save();
+        this.undoStack.push(pdfBytes);
+        this.redoStack = [];
+        PDFViewerApplication.open({
+            data: pdfBytes,
+        });
+    }
+
+    async deletePage(deleteAt) {
+        const PDFViewerApplication = window.PDFViewerApplication;
+        const libPdfDoc = PDFViewerApplication.pdfDoc;
+        libPdfDoc.removePage(deleteAt - 1);
+        const pdfBytes = await libPdfDoc.save();
+        this.undoStack.push(pdfBytes);
+        this.redoStack = [];
+        PDFViewerApplication.open({
+            data: pdfBytes,
+        });
     }
 
     createPageNumberInput(event) {
@@ -83,7 +108,23 @@ class PageOrganizer {
         input.style.width = "3em";
         input.style.marginLeft = "5px";
         button.appendChild(input);
-        
+
+        // Add event listener to the input field
+        // to read the value when the user presses enter
+        input.addEventListener("keyup", async (keyboardEvent) => {
+            if (keyboardEvent.key === "Enter") {
+                const pageNumber = parseInt(input.value);
+                if (pageNumber < 1 || pageNumber > window.PDFViewerApplication.pagesCount) {
+                    return;
+                }
+                if (event.name === "insertpage") {
+                    await this.insertPage(pageNumber);
+                }
+                else if (event.name === "deletepage") {
+                    await this.deletePage(pageNumber);
+                }
+            }
+        });
     }
 
 

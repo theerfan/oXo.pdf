@@ -1010,6 +1010,14 @@ const PDFViewerApplication = {
         this._documentError("unable_to_download_pdf", ex);
       }
     }
+    else if (args.data) {
+      try {
+        this.pdfDoc = await PDFLib.PDFDocument.load(args.data);
+      }
+      catch (ex) {
+        this._documentError("unable_to_download_pdf", ex);
+      }
+    }
     const loadingTask = getDocument(loadingTaskParams);
     if (this.l10n == null || this.pdfLinkService == null || this.pdfViewer == null || this.pdfThumbnailViewer == null || this.pdfScriptingManager == null) {
       webViewerLoad();
