@@ -56,6 +56,22 @@ class PageOrganizer {
 
     }
 
+    copyAndPushToStack(originalArray, stack) {
+        // Copy the original Uint8Array
+        const newArray = new Uint8Array(originalArray.length);
+        newArray.set(originalArray);
+
+        // Alternatively, use slice for a more concise approach
+        // const newArray = originalArray.slice();
+
+        // Push the copied array onto the stack
+        stack.push(newArray);
+
+        // Return the new array for reference, if needed
+        return newArray;
+    }
+
+
     async insertPage(insertAt) {
         const PDFViewerApplication = window.PDFViewerApplication;
         const libPdfDoc = PDFViewerApplication.pdfDoc;
@@ -63,7 +79,7 @@ class PageOrganizer {
         const pagesizeList = [pageSize.width, pageSize.height]
         const blankPage = libPdfDoc.insertPage(insertAt - 1, pagesizeList);
         const pdfBytes = await libPdfDoc.save();
-        this.undoStack.push(pdfBytes);
+        this.copyAndPushToStack(pdfBytes, this.undoStack);
         this.redoStack = [];
         PDFViewerApplication.open({
             data: pdfBytes,
@@ -75,7 +91,7 @@ class PageOrganizer {
         const libPdfDoc = PDFViewerApplication.pdfDoc;
         libPdfDoc.removePage(deleteAt - 1);
         const pdfBytes = await libPdfDoc.save();
-        this.undoStack.push(pdfBytes);
+        this.copyAndPushToStack(pdfBytes, this.undoStack);
         this.redoStack = [];
         PDFViewerApplication.open({
             data: pdfBytes,
@@ -123,6 +139,8 @@ class PageOrganizer {
                 else if (event.name === "deletepage") {
                     await this.deletePage(pageNumber);
                 }
+                // Remove the input field
+                button.removeChild(input);
             }
         });
     }
