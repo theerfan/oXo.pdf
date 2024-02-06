@@ -15,6 +15,10 @@
 
 
 class PageOrganizer {
+    
+    #boundInsertPage = this.insertPage.bind(this);
+    #boundDeletePage = this.deletePage.bind(this);
+
     constructor(params) {
         // this.createPageNumberInput();
 
@@ -56,6 +60,11 @@ class PageOrganizer {
 
     }
 
+    getUIManager() {
+        return window.PDFViewerApplication.pdfViewer._layerProperties.annotationEditorUIManager;
+    }
+
+
     copyAndPushToStack(originalArray, stack) {
         // Copy the original Uint8Array
         const newArray = new Uint8Array(originalArray.length);
@@ -73,38 +82,38 @@ class PageOrganizer {
 
 
     async insertPage(insertAt) {
-        const PDFViewerApplication = window.PDFViewerApplication;
-        const libPdfDoc = PDFViewerApplication.pdfDoc;
+        const libPdfDoc = window.PDFViewerApplication.pdfDoc;
         const pageSize = libPdfDoc.getPage(insertAt - 1).getSize();
         const pagesizeList = [pageSize.width, pageSize.height]
         const blankPage = libPdfDoc.insertPage(insertAt - 1, pagesizeList);
         const pdfBytes = await libPdfDoc.save();
         this.copyAndPushToStack(pdfBytes, this.undoStack);
         this.redoStack = [];
-        PDFViewerApplication.open({
+        window.PDFViewerApplication.open({
             data: pdfBytes,
         });
     }
 
     async deletePage(deleteAt) {
-        const PDFViewerApplication = window.PDFViewerApplication;
-        const libPdfDoc = PDFViewerApplication.pdfDoc;
+        const libPdfDoc = window.PDFViewerApplication.pdfDoc;
         libPdfDoc.removePage(deleteAt - 1);
         const pdfBytes = await libPdfDoc.save();
         this.copyAndPushToStack(pdfBytes, this.undoStack);
         this.redoStack = [];
-        PDFViewerApplication.open({
+        window.PDFViewerApplication.open({
             data: pdfBytes,
         });
     }
 
     createPageNumberInput(event) {
-        let button;
+        let button, functionToCall;
         if (event.name === "insertpage") {
             button = document.getElementById("insertPage");
+            functionToCall = this.#boundInsertPage;
         }
         else if (event.name === "deletepage") {
             button = document.getElementById("deletePage");
+            functionToCall = this.#boundDeletePage;
         }
         else {
             return;
@@ -134,21 +143,45 @@ class PageOrganizer {
                     return;
                 }
                 if (event.name === "insertpage") {
-                    await this.insertPage(pageNumber);
+                    await functionToCall(pageNumber);
                 }
                 else if (event.name === "deletepage") {
-                    await this.deletePage(pageNumber);
+                    await functionToCall(pageNumber);
                 }
                 // Remove the input field
                 button.removeChild(input);
             }
         });
+
+        const cmd = async () => {
+            const pageNumber = parseInt(input.value);
+            if (pageNumber < 1 || pageNumber > window.PDFViewerApplication.pagesCount) {
+                return;
+            }
+            this.undoStack.push(await window.PDFViewerApplication.pdfDoc.save());
+            this.redoStack = [];
+            await functionToCall(pageNumber);
+        }
+        
+        const undo = async () => {
+            const oldBytes = this.undoStack.pop();
+            this.redoStack.push(await window.PDFViewerApplication.pdfDoc.save());
+            window.PDFViewerApplication.open({
+                data: oldBytes,
+            });
+        }
+
+        this.addCommands({ cmd, undo, mustExec: true });
     }
 
 
     async confirmCrop() {
         const PDFViewerApplication = window.PDFViewerApplication;
 
+    }
+
+    addCommands(params) {
+        this.getUIManager().addCommands(params);
     }
 
 }
