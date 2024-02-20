@@ -899,8 +899,9 @@ const PDFViewerApplication = {
       this._annotationStorageModified
     ) {
       try {
+        // TODO: Check this later, disabled .save to avoid new page opening
         // Trigger saving, to prevent data loss in forms; see issue 12257.
-        await this.save();
+        // await this.save();
       } catch {
         // Ignoring errors, to ensure that document closing won't break.
       }
@@ -959,7 +960,12 @@ const PDFViewerApplication = {
    * @returns {Promise} - Promise that is resolved when the document is opened.
    */
   async open(args) {
+    let annotationStorage = null;
     if (this.pdfLoadingTask) {
+      if (args.sameDocumentModified) {
+        // Keep the annotation storage from the previous document.
+        annotationStorage = this.pdfDocument.annotationStorage;
+      }
       // We need to destroy already opened document.
       await this.close();
     }
@@ -1047,7 +1053,7 @@ const PDFViewerApplication = {
 
     return loadingTask.promise.then(
       pdfDocument => {
-        this.load(pdfDocument);
+        this.load(pdfDocument, annotationStorage);
       },
       reason => {
         if (loadingTask !== this.pdfLoadingTask) {
@@ -1215,7 +1221,7 @@ const PDFViewerApplication = {
     }
   },
 
-  load(pdfDocument) {
+  load(pdfDocument, preLoadedAnnotationStorage = null) {
     this.pdfDocument = pdfDocument;
 
     pdfDocument.getDownloadInfo().then(({ length }) => {
@@ -1278,6 +1284,10 @@ const PDFViewerApplication = {
       .catch(() => {
         /* Unable to read from storage; ignoring errors. */
       });
+
+    if (preLoadedAnnotationStorage) {
+      this.pdfDocument.annotationStorage.setAll(preLoadedAnnotationStorage.getAll());
+    }
 
     firstPagePromise.then(pdfPage => {
       this.loadingBar?.setWidth(this.appConfig.viewerContainer);
@@ -1442,6 +1452,7 @@ const PDFViewerApplication = {
 
     this._initializePageLabels(pdfDocument);
     this._initializeMetadata(pdfDocument);
+
   },
 
   /**

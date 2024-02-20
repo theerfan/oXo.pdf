@@ -15,7 +15,7 @@
 
 
 class PageOrganizer {
-    
+
     #boundInsertPage = this.insertPage.bind(this);
     #boundDeletePage = this.deletePage.bind(this);
 
@@ -29,6 +29,7 @@ class PageOrganizer {
         document.addEventListener('keydown', async (event) => {
             if (event.ctrlKey && event.key === 'z') { // Undo
                 if (this.undoStack.length > 0) {
+                    console.trace();
                     // const [currentPageNumber, currentPageDiv, pageRect] = this.getPageRect(window.PDFViewerApplication);
                     // const libPdfDoc = window.PDFViewerApplication.pdfDoc;
                     // const pdfLibPage = libPdfDoc.getPages()[currentPageNumber - 1];
@@ -90,7 +91,7 @@ class PageOrganizer {
         this.copyAndPushToStack(pdfBytes, this.undoStack);
         this.redoStack = [];
         window.PDFViewerApplication.open({
-            data: pdfBytes,
+            data: pdfBytes, sameDocumentModified: true
         });
     }
 
@@ -101,7 +102,7 @@ class PageOrganizer {
         this.copyAndPushToStack(pdfBytes, this.undoStack);
         this.redoStack = [];
         window.PDFViewerApplication.open({
-            data: pdfBytes,
+            data: pdfBytes, sameDocumentModified: true
         });
     }
 
@@ -142,36 +143,37 @@ class PageOrganizer {
                 if (pageNumber < 1 || pageNumber > window.PDFViewerApplication.pagesCount) {
                     return;
                 }
-                if (event.name === "insertpage") {
+                // if (event.name === "insertpage") {
+                //     await functionToCall(pageNumber);
+                // }
+                // else if (event.name === "deletepage") {
+                //     await functionToCall(pageNumber);
+                // }
+                const cmd = async () => {
+                    const pageNumber = parseInt(input.value);
+                    if (pageNumber < 1 || pageNumber > window.PDFViewerApplication.pagesCount) {
+                        return;
+                    }
+                    this.undoStack.push(await window.PDFViewerApplication.pdfDoc.save());
+                    this.redoStack = [];
                     await functionToCall(pageNumber);
                 }
-                else if (event.name === "deletepage") {
-                    await functionToCall(pageNumber);
+
+                const undo = async () => {
+                    const oldBytes = this.undoStack.pop();
+                    this.redoStack.push(await window.PDFViewerApplication.pdfDoc.save());
+                    window.PDFViewerApplication.open({
+                        data: oldBytes,
+                    });
                 }
+
+                this.addCommands({ cmd, undo, mustExec: true, keepUndo: true});
                 // Remove the input field
                 button.removeChild(input);
             }
         });
 
-        const cmd = async () => {
-            const pageNumber = parseInt(input.value);
-            if (pageNumber < 1 || pageNumber > window.PDFViewerApplication.pagesCount) {
-                return;
-            }
-            this.undoStack.push(await window.PDFViewerApplication.pdfDoc.save());
-            this.redoStack = [];
-            await functionToCall(pageNumber);
-        }
-        
-        const undo = async () => {
-            const oldBytes = this.undoStack.pop();
-            this.redoStack.push(await window.PDFViewerApplication.pdfDoc.save());
-            window.PDFViewerApplication.open({
-                data: oldBytes,
-            });
-        }
 
-        this.addCommands({ cmd, undo, mustExec: true });
     }
 
 
