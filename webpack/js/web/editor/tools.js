@@ -1150,6 +1150,10 @@ class AnnotationEditorUIManager {
     }
   }
 
+  publicAddkeyBoardManager() {
+    this.#addKeyboardManager();
+  }
+
   registerEditorTypes(types) {
     if (this.#editorTypes) {
       return;

@@ -26,38 +26,38 @@ class PageOrganizer {
         this.undoStack = [];
         this.redoStack = [];
 
-        document.addEventListener('keydown', async (event) => {
-            if (event.ctrlKey && event.key === 'z') { // Undo
-                if (this.undoStack.length > 0) {
-                    console.trace();
-                    // const [currentPageNumber, currentPageDiv, pageRect] = this.getPageRect(window.PDFViewerApplication);
-                    // const libPdfDoc = window.PDFViewerApplication.pdfDoc;
-                    // const pdfLibPage = libPdfDoc.getPages()[currentPageNumber - 1];
-                    // const initialCropBox = this.undoStack.pop();
-                    // this.redoStack.push(pdfLibPage.getCropBox());
-                    // pdfLibPage.setCropBox(initialCropBox.x, initialCropBox.y, initialCropBox.width, initialCropBox.height);
-                    // const pdfBytes = await libPdfDoc.save();
-                    // window.PDFViewerApplication.open({
-                    //     data: pdfBytes,
-                    // });
-                    // currentPageDiv.scrollIntoView({ behavior: 'smooth' });
-                }
-            } else if (event.ctrlKey && event.key === 'y') { // Redo
-                if (this.redoStack.length > 0) {
-                    // const [currentPageNumber, currentPageDiv, pageRect] = this.getPageRect(window.PDFViewerApplication);
-                    // const libPdfDoc = window.PDFViewerApplication.pdfDoc;
-                    // const pdfLibPage = libPdfDoc.getPages()[currentPageNumber - 1];
-                    // const initialCropBox = this.redoStack.pop();
-                    // this.undoStack.push(pdfLibPage.getCropBox());
-                    // pdfLibPage.setCropBox(initialCropBox.x, initialCropBox.y, initialCropBox.width, initialCropBox.height);
-                    // const pdfBytes = await libPdfDoc.save();
-                    // window.PDFViewerApplication.open({
-                    //     data: pdfBytes,
-                    // });
-                    // currentPageDiv.scrollIntoView({ behavior: 'smooth' });
-                }
-            }
-        });
+        // document.addEventListener('keydown', async (event) => {
+        //     if (event.ctrlKey && event.key === 'z') { // Undo
+        //         if (this.undoStack.length > 0) {
+        //             console.trace();
+        //             const [currentPageNumber, currentPageDiv, pageRect] = this.getPageRect(window.PDFViewerApplication);
+        //             const libPdfDoc = window.PDFViewerApplication.pdfDoc;
+        //             const pdfLibPage = libPdfDoc.getPages()[currentPageNumber - 1];
+        //             const initialCropBox = this.undoStack.pop();
+        //             this.redoStack.push(pdfLibPage.getCropBox());
+        //             pdfLibPage.setCropBox(initialCropBox.x, initialCropBox.y, initialCropBox.width, initialCropBox.height);
+        //             const pdfBytes = await libPdfDoc.save();
+        //             window.PDFViewerApplication.open({
+        //                 data: pdfBytes,
+        //             });
+        //             currentPageDiv.scrollIntoView({ behavior: 'smooth' });
+        //         }
+        //     } else if (event.ctrlKey && event.key === 'y') { // Redo
+        //         if (this.redoStack.length > 0) {
+        //             const [currentPageNumber, currentPageDiv, pageRect] = this.getPageRect(window.PDFViewerApplication);
+        //             const libPdfDoc = window.PDFViewerApplication.pdfDoc;
+        //             const pdfLibPage = libPdfDoc.getPages()[currentPageNumber - 1];
+        //             const initialCropBox = this.redoStack.pop();
+        //             this.undoStack.push(pdfLibPage.getCropBox());
+        //             pdfLibPage.setCropBox(initialCropBox.x, initialCropBox.y, initialCropBox.width, initialCropBox.height);
+        //             const pdfBytes = await libPdfDoc.save();
+        //             window.PDFViewerApplication.open({
+        //                 data: pdfBytes,
+        //             });
+        //             currentPageDiv.scrollIntoView({ behavior: 'smooth' });
+        //         }
+        //     }
+        // });
 
     }
 
@@ -135,6 +135,8 @@ class PageOrganizer {
         input.style.marginLeft = "5px";
         button.appendChild(input);
 
+        this.getUIManager().publicAddkeyBoardManager();
+
         // Add event listener to the input field
         // to read the value when the user presses enter
         input.addEventListener("keyup", async (keyboardEvent) => {
@@ -143,12 +145,7 @@ class PageOrganizer {
                 if (pageNumber < 1 || pageNumber > window.PDFViewerApplication.pagesCount) {
                     return;
                 }
-                // if (event.name === "insertpage") {
-                //     await functionToCall(pageNumber);
-                // }
-                // else if (event.name === "deletepage") {
-                //     await functionToCall(pageNumber);
-                // }
+
                 const cmd = async () => {
                     const pageNumber = parseInt(input.value);
                     if (pageNumber < 1 || pageNumber > window.PDFViewerApplication.pagesCount) {
@@ -157,7 +154,7 @@ class PageOrganizer {
                     this.undoStack.push(await window.PDFViewerApplication.pdfDoc.save());
                     this.redoStack = [];
                     await functionToCall(pageNumber);
-                }
+                };
 
                 const undo = async () => {
                     const oldBytes = this.undoStack.pop();
@@ -165,21 +162,13 @@ class PageOrganizer {
                     window.PDFViewerApplication.open({
                         data: oldBytes,
                     });
-                }
+                };
 
-                this.addCommands({ cmd, undo, mustExec: true, keepUndo: true});
+                this.addCommands({ cmd, undo, mustExec: true, keepUndo: true });
                 // Remove the input field
                 button.removeChild(input);
             }
         });
-
-
-    }
-
-
-    async confirmCrop() {
-        const PDFViewerApplication = window.PDFViewerApplication;
-
     }
 
     addCommands(params) {

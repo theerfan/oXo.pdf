@@ -1286,7 +1286,9 @@ const PDFViewerApplication = {
       });
 
     if (preLoadedAnnotationStorage) {
-      this.pdfDocument.annotationStorage.setAll(preLoadedAnnotationStorage.getAll());
+      if (preLoadedAnnotationStorage.getAll()) {
+        this.pdfDocument.annotationStorage.setAll(preLoadedAnnotationStorage.getAll());
+      }
     }
 
     firstPagePromise.then(pdfPage => {
