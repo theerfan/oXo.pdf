@@ -2591,6 +2591,8 @@ function handleFileSelection(files) {
   if (existingListContainer) {
     existingListContainer.remove();
   }
+  
+  let fileMap = new Map();
 
   const listContainer = document.createElement("div");
   listContainer.id = "fileListContainer";
@@ -2605,6 +2607,7 @@ function handleFileSelection(files) {
     li.textContent = file.name;
     li.draggable = true;
     listElement.appendChild(li);
+    fileMap.set(file.name, file);
   }
 
   let draggedItem = null;
@@ -2640,9 +2643,52 @@ function handleFileSelection(files) {
   confirmBtn.style.marginTop = "10px"; // Adds space between the list and the button
 
   // Add an event listener to handle the click event
-  confirmBtn.addEventListener('click', () => {
+  confirmBtn.addEventListener('click', async () => {
     console.log("Combining files in the current order...");
-    // Implement the file combination logic here
+
+    const { PDFDocument } = PDFLib;
+    const combinedPdfDoc = await PDFDocument.create();
+
+    const filesList = document.querySelectorAll("#filesList li");
+
+    for (const fileItem of filesList) {
+      // Assuming you've stored the File objects in a Map or similar, keyed by file name
+      const file = fileMap.get(fileItem.textContent); // fileMap needs to be defined elsewhere
+      if (file) {
+        const fileReader = new FileReader();
+        fileReader.readAsArrayBuffer(file);
+        fileReader.onload = async (e) => {
+          const arrayBuffer = e.target.result;
+          const pdfDoc = await PDFDocument.load(arrayBuffer);
+          const copiedPages = await combinedPdfDoc.copyPages(pdfDoc, pdfDoc.getPageIndices());
+          copiedPages.forEach((page) => combinedPdfDoc.addPage(page));
+        };
+        fileReader.onerror = (e) => console.error("File read error:", e);
+      }
+    }
+
+    // This timeout is a simplification. In reality, you should wait for all file reads to complete.
+    // setTimeout(async () => {
+    //   const combinedPdfBytes = await combinedPdfDoc.save();
+    //   downloadPdf(combinedPdfBytes, "combined.pdf");
+    // }, 5000); // Increase time as needed based on the number of files
+
+    // function downloadPdf(pdfBytes, filename) {
+    //   const blob = new Blob([pdfBytes], { type: "application/pdf" });
+    //   const link = document.createElement("a");
+    //   link.href = URL.createObjectURL(blob);
+    //   link.download = filename;
+    //   document.body.appendChild(link);
+    //   link.click();
+    //   document.body.removeChild(link);
+    // }
+
+    const combinedBytes = await combinedPdfDoc.save();
+    listContainer.remove();
+    PDFViewerApplication.open({
+      data: combinedBytes,
+    })
+
   });
 
   listContainer.appendChild(confirmBtn);
