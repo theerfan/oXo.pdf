@@ -33,6 +33,7 @@ import { PagesCountLimit } from "./pdf_viewer.js";
  * @property {HTMLButtonElement} openURLButton - Button to open a file via URL.
  * @property {HTMLButtonElement} insertPageButton - Button to insert a page.
  * @property {HTMLButtonElement} deletePageButton - Button to delete a page.
+ * @property {HTMLButtonElement} combineFilesButton - Button to delete a page.
  * @property {HTMLButtonElement} printButton - Button to print the document.
  * @property {HTMLButtonElement} downloadButton - Button to download the
  *   document.
@@ -163,6 +164,11 @@ class SecondaryToolbar {
       {
         element: options.deletePageButton,
         eventName: "deletepage",
+        close: false,
+      },
+      {
+        element: options.combineFilesButton,
+        eventName: "combinefiles",
         close: false,
       }
     ];

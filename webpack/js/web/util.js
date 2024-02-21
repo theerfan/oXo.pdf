@@ -1118,6 +1118,7 @@ function getViewerConfiguration() {
       openURLButton: document.getElementById("secondaryOpenFileURL"),
       insertPageButton: document.getElementById("insertPage"),
       deletePageButton: document.getElementById("deletePage"),
+      combineFilesButton: document.getElementById("combineFiles"),
       printButton: document.getElementById("secondaryPrint"),
       downloadButton: document.getElementById("secondaryDownload"),
       viewBookmarkButton: document.getElementById("viewBookmark"),

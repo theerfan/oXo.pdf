@@ -1952,6 +1952,7 @@ const PDFViewerApplication = {
     eventBus._on("openurl", webViewerOpenURL);
     eventBus._on("insertpage", webViewerInsertPage);
     eventBus._on("deletepage", webViewerDeletePage);
+    eventBus._on("combinefiles", webViewerCombineFiles);
 
 
     if (AppOptions.get("pdfBug")) {
@@ -2559,6 +2560,96 @@ function webViewerDeletePage(evt) {
   // }
 }
 
+function webViewerCombineFiles(evt) {
+
+  const multipleFileInput = document.createElement("input");
+  // Change the type to only allow PDF files
+  multipleFileInput.type = "file";
+  multipleFileInput.accept = ".pdf";
+  // Allow the input to accept multiple files
+  multipleFileInput.multiple = true;
+  // Hide the input
+  multipleFileInput.style.display = "none";
+  // Add the input to the document
+  document.body.appendChild(multipleFileInput);
+  // When the input changes
+  multipleFileInput.onchange = function (event) {
+    handleFileSelection(event.target.files);
+  }
+  // Trigger a click event on the input
+  multipleFileInput.click();
+
+  multipleFileInput.remove();
+
+
+}
+
+function handleFileSelection(files) {
+
+  // if list already exists, remove it
+  const existingListContainer = document.getElementById("fileListContainer");
+  if (existingListContainer) {
+    existingListContainer.remove();
+  }
+
+  const listContainer = document.createElement("div");
+  listContainer.id = "fileListContainer";
+
+  const listElement = document.createElement("ul");
+  listElement.id = "filesList";
+  listElement.innerHTML = '';
+
+  // Display files in a list
+  for (const file of files) {
+    const li = document.createElement('li');
+    li.textContent = file.name;
+    li.draggable = true;
+    listElement.appendChild(li);
+  }
+
+  let draggedItem = null;
+
+  // Add drag-and-drop event listeners
+  listElement.addEventListener('dragstart', (e) => {
+    draggedItem = e.target;
+    e.target.style.opacity = 0.5;
+  });
+
+  listElement.addEventListener('dragend', (e) => {
+    e.target.style.opacity = "";
+  });
+
+  listElement.addEventListener('dragover', (e) => {
+    e.preventDefault(); // Necessary to allow dropping
+    const activeElement = document.elementFromPoint(e.clientX, e.clientY);
+    if (activeElement && activeElement.parentNode === listElement && activeElement !== draggedItem) {
+      const rect = activeElement.getBoundingClientRect();
+      const relY = e.clientY - rect.top;
+      const swap = relY > (rect.height / 2) ? activeElement.nextSibling : activeElement;
+      listElement.insertBefore(draggedItem, swap);
+    }
+  });
+
+  // Add the list to the document
+  listContainer.appendChild(listElement);
+  document.body.appendChild(listContainer);
+
+  // Create and add the confirmation button below the list
+  const confirmBtn = document.createElement("button");
+  confirmBtn.textContent = "Confirm File Order";
+  confirmBtn.style.marginTop = "10px"; // Adds space between the list and the button
+
+  // Add an event listener to handle the click event
+  confirmBtn.addEventListener('click', () => {
+    console.log("Combining files in the current order...");
+    // Implement the file combination logic here
+  });
+
+  listContainer.appendChild(confirmBtn);
+
+  console.log(files); // For now, just log the files
+  // Next steps will implement handling these files
+}
 
 
 

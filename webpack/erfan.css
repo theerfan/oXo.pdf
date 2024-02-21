@@ -35,3 +35,30 @@
     cursor: ns-resize;
     /* Vertical resize cursor */
 }
+
+/* Basic styles for the draggable list */
+#fileListContainer {
+    list-style-type: none;
+    margin: 0;
+    width: 60%;
+    top: 5%;
+    padding: 20px;
+    position: absolute;
+    box-sizing: border-box;
+    border: 2px solid #ddd;
+    margin: 10px;
+    list-style-type: none;
+}
+
+#filesList li {
+    margin: 0.5rem;
+    padding: 0.5rem;
+    background-color: #f0f0f0;
+    border: 1px solid #ddd;
+    cursor: grab;
+    border-bottom: 1px solid #ddd;
+}
+
+.dragging {
+    opacity: 0.5;
+}

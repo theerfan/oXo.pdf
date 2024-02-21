@@ -57,6 +57,8 @@ pdfjs-insert-page-button-label = Insert Page
 pdfjs-delete-page-button =
     .title = Delete Page
 pdfjs-delete-page-button-label = Delete Page
+pdfjs-combine-files-button = Combine Files
+pdfjs-combine-files-button-label = Combine Files
 
 
 # Used in Firefox for Android as a tooltip for the download button (“download” is a verb).
